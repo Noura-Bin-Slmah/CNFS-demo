@@ -1,0 +1,1073 @@
+consultation,model,ground_truth_note,model_note,human_critical_incorrect,human_noncritical_incorrect,human_critical_omissions,human_noncritical_omissions,n_evaluators
+day1_consultation012,model_5,"3/7 hx ago developed vomiting. Has now developed diarrhea - 5-6x/day. Watery/loose stools. No blood in stools. No abdo pain. 
+  Reduced oral intake. Not drinking sufficient fluids. Feels dehydrated. Appetite reduced. 
+  No fever/temp, but feels warm. Feels weak. No headaches/muscle pain. 
+  Unaware of triggers. No unwell contacts 
+  
+  PMH: asthma 
+  DH: salbutamol PRN 
+  NKDA
+  FH: father - HTN, died of bowel Ca. mother - diabetes Type 2
+  SH: lives alone , software engineer. Nil smoking, social EtOH","Diarrhoea for the past 3 days, loose for 3 days more or less.
+Very bad diarrhoea, keeps going back and forth to the toilet.
+Started 3 days ago.
+Started with vomiting, couple of times, now diarrhoea is the main issue.
+Going to the toilet very often, 5-6 times a day.
+Watery loose stools.
+No blood.
+Feels dehydrated.
+E+D ok. No abdominal pain.
+No fever.
+No headache.
+No muscle pains.
+3 days ago was at home, was working on the computer when symptoms started.
+Had some take away food.
+No one unwell with diarrhoea recently.
+PMH: asthma.
+DH: blue inhaler, NKDA.
+FH: father has high BP, bowel cancer.
+Brother has diabetes.
+Lives alone.
+SH: software engineer.
+Taking time off work recently.
+Non smoker.
+Not drinking socially.",2.6,1.6,1.4,2.0,5
+day1_consultation014,model_5,"5/7 hx of cough and runny nose. Dry cough, keeps pt up at night. Runny nose, no ear pain, no sore throat. 
+  No SOB/chest pain
+  Feeling tired, weak and myalgia. 
+  Feeling shivery, hot/cold, ?fever 
+  No nausea/vomiting 
+  Appetite maintained. 
+  Initial diarrhea - but now resolved 
+  Nil urinary symptoms
+  No rashes 
+  
+  PMH: Type 2 diabetes, HTN
+  DH: metformin, lisinopril 
+  NKDA
+  FH: Father - type 2 diabetes 
+  SH: lives with partner, works IT, denies stress. Ex-smoker - stopped 6/12 ago. Social EtOH <14 units/week","cough and runny nose for a few days.
+Coughing up phlegm and nose running.
+Cough and nose running for a couple of days.
+Started 5-6 days ago.
+Started 1 week ago.
+Dry cough.
+Keeps you up at night.
+No sore throat.
+No earache or discharge.
+Breathing not labored.
+Feels tired.
+No chest pain.
+No nausea or vomiting.
+Appetite ok.
+Appetite ok. Had some diarrhoea at the start but settled.
+Appetite ok. Appetite ok. Had some diarrhoea at the start but settled.
+No problems with waterworks.
+Passing urine ok.
+Drinking plenty of fluids.
+No skin rashes or problems with muscles.
+Had chills and cold a few days ago.
+Feeling hot and cold at the moment.
+No shortness of breath.
+PMH: HTN, diabetes, high blood pressure.
+DH: inoperable for HTN.
+NKDA.
+FH: father has type 2 diabetes.
+Lives at home with partner.
+Works as software developer.
+No stress.
+SH: ex-smoker, lives with partner.
+Alcohol - 3 units/week.
+wine.",4.6,1.0,4.8,1.0,5
+day1_consultation04,model_5,"4/7 hx of generally unwell, mainly sore throat, runny nose, fatigue, myalgia and general joint pain. Sore throat is improving. Also has nasal congestion. Now developed a cough -mainly dry, constant. Night sweats for the past 4/7. Initially had fever, but now settling with paracetamol/ibuprofen. 
+  No chest pain. Feels more SOB on exertion. 
+  Associated headaches - generalized, intermittent. No visual sx/photophobia. No nausea/vomiting. No bowel or urinary sx. Drinking fluids, reduced appetite. No rashes
+  
+  PMH: Nil 
+  DH: nil 
+  NKDA
+  FH: Grandmother - type 2 diabetes
+  SH: lives alone, works as an accountant. Occasional smoker/etOH. Finding work slightly stressful. No mood sx.","unwell for the past 4 days - sore throat and runny nose and cough.
+sore throat improving but cough is getting worse.
+throat is slightly red and sore to swallow, no pus on tonsils, no exudates, not short of breath, no shortness of breath.
+congested.
+dry cough.
+no night sweats.
+some fever in beginning, now settled.
+no chest pain, feels bit windy on exertion.
+when resting feels fine.
+headaches.
+vision is fine.
+no nausea or vomiting.
+appetite is ok. bowels - ok.
+appetite is ok. bowels - ok. no rashes.
+appetite is ok. bowels - ok. appetite is ok. bowels - ok. no rashes.
+no general muscle pain or joint pain.
+fit and well, medications- nil, allergies- nil.
+grandad - diabetes.
+work - accountant.
+live alone.
+stress at work.
+smoker- occasionally.
+alcohol - not regular.
+socialising well.",4.0,1.8,5.6,3.8,5
+day1_consultation05,model_5,"2/7 ago developed lower abdo pain/suprapubic pain, gradual onset, burning pain, constant, progressively worsening
+  No bowel sx. 
+  Urinary sx - noticed some pink coloured urine, no frank haematuria, nil dysuria. 
+  Some nausea, no vomiting
+  Feeling hot and sweaty
+  Currently sexually active with regular partner. Last STD 6/12 ago. Unprotected SI 2/7 ago. 
+  LMP 2/52 ago 
+  
+  No chest pain/SOB/palpitations
+  No headches/visual sx
+  
+  PMH: nil
+  PSH: nil 
+  DH: implanon , otherwise nil
+  FH: nil 
+  SH: roomshare with 2 flatmates, works as an accountant. Nil smoking, social EtOH","some pain in lower abdomen, feeling hot and sweaty.
+symptoms started 2 days ago - lower abdo pain and feeling hot/sweaty.
+pain located below belly button, localised, localised to area where umbilicus is attached, not tender to touch.
+came on suddenly, more gradual onset.
+getting worse.
+burning pain.
+pain constant, comes and goes.
+bowels working normally, some constipation but better.
+no loose stools, no diarrhoea.
+family is normal.
+passing urine ok, little pink in colour.
+no blood in urine.
+no pain or sting when passing urine.
+passing urine more regularly.
+some nausea, no vomiting.
+sexually active - same partner, last sexual act 4 days ago.
+last STI screen was normal.
+Implanon inserted 1 year ago.
+still having periods.
+LMP - 3 weeks ago.
+no chance of pregnancy.
+no other partners since then.
+no contraception, uses implanon.
+burning pain, getting worse, some pink urine, no burning or stinging pain when pausing bowels, getting hot and sweating.
+pmh: fit and well, medications: implanon, allergies: nil.
+SH: accountant, lives with 3 others.
+alcohol - moderate.
+non smoker.",5.2,3.6,2.4,3.2,5
+day1_consultation06,model_5,"2/5 hx of SOB, worsening over the past 2/7. Feeling more SOB on minimal exertion, nil SOB at rest. No chest pain/palpitations. Assoc cough - mainly dry. No fevers. Has also noticed ankle odema bilaterally over past few days extending to shins. 
+  Diagnosed with heart failure previously and currently on diuretics. 
+  Urinary - Polyuria, nil else
+  
+  PMH: Heart failure, ?unstable angina 
+  DH: furosemide, aspirin, bisoprolol, simvastatin
+  NKDA
+  FH - father died of MI early 60s , mother - osteoporosis 
+  SH: lives alone, 2 cats , works part time as a lorry driver. Ex-smoker - a pack/d for 25 years. No etOH","Suffering from shortness of breath for the past few months.
+Worse over the last couple of weeks.
+Last 2 days has become quite difficult.
+Can walk to the shops but now has to sit down and catch her breath.
+Worried as has heart failure and was told this a while ago.
+No chest pain.
+Has a bit of a dry cough.
+General Health: feeling a bit rundown.
+Noticed ankles are bigger.
+Both ankles.
+Noticed this last few days.
+Has had before in the past when had heart failure.
+No palpitations.
+No fevers.
+Appetite ok.
+Passing urine ok.
+Passing urine ok. PMH: heart failure, small chest attack 5 years ago.
+DH: aspirin.
+NKDA.
+FH: father - heart attack.
+Mother - osteoporosis.
+Lives alone with cats.
+Works as lorry driver.
+Does a lot of anti-social driving at the weekend.
+No night shifts.
+Ex smoker.
+1 pack a day.
+Alcohol - once a day.
+Used to do a lot of exercise.",3.0,1.8,3.6,1.8,5
+day1_consultation08,model_5,"3/7 hx of dry itchy skin, mainly on the hands and palms. No spread elsewhere. No bleeding/discharge. No cracked skin. Sx started after going swimming. No prev skin problems. 
+  No fevers. No vomiting. 
+  Appetite maintained, nil nausea/vomiting 
+  Nil bowel/urinary sx 
+  
+  PMH: Lactose intolerance
+  DH: microgynon
+  NKDA
+  FH: Father - asthma, Mother - hayfever 
+  SH: - lives alone, nil smoker/etOH/recreational drugs , works as primary school teacher. Recent stress ++","stressed at work and realized has dry itchy itchy skin.
+dry itchy skin on face, no signs of cellulitis or bacterial skin infection.
+itchy dry skin on arms and hands for past few days.
+no signs of bacterial skin infection or dry skin.
+started few days ago.
+using coconut cream.
+no fever, no sweating.
+works as a teacher.
+children annoying.
+has been before.
+symptoms came on after going swimming.
+no fevers.
+no vomiting.
+eating and drinking normally.
+no problems with vomiting or loose stools.
+passing urine ok.
+passing urine ok. pmh: nil.
+passing urine ok. passing urine ok. pmh: nil.
+meds: quetiapine.
+nkda.
+social: live alone.
+non smoker.
+alcohol - nil.
+work as a primary school teacher.
+no symptoms of eczema or dermatitis.",2.2,1.8,4.0,2.2,5
+day2_consultation02,model_5,"Hx: 1 week history of spontaneous elbow swelling left. Not painful. No trauma. 
+  No FH of rheumatological disease- NB pt says he has been old he has OA previously by doctors- ? need to confirm this
+  Works in a desk job
+  Not happened before
+  Otherwise well- 
+  PMHx: nil of note
+  FH: nil of note
+  DH: not on any medication, allergic to peanuts
+  SH: exercises regularly, active
+  Ex: looks well, not in pain. Mild erythema and minimal swelling (if any) around olecranon process left elbow","You are at home and ok to talk.
+In a private place and able to speak freely.
+HPC: noticed a week ago, weird feeling on the elbow, when in the shower it is not painful, feels warm and like fluid inside, not painful.
+left elbow.
+no injury or trauma.
+not happened before.
+thinks has osteoarthritis.
+PC: left elbow.
+Allergies: peanuts.
+palpation: warm compared to surrounding skin.
+tip of the elbow is a bit warmer and tender.
+no dry skin anywhere else.
+DH: nil NKDA.
+SH: desk based, running 2-3 times a week.",1.2,0.0,2.2,0.6,5
+day2_consultation03,model_5,"Hx: 1 week history of left side difficulty hearing and facial numbness
+  No dysphagia, dysarthria, no unilateral weakness/numbness in the rest of the body, no visual disturbances 
+  No ear pain, ear discharge, fever, itchiness or cotton bud use.
+  Slight tinnitus at times in this period- not continuous
+  Numbness and difficulty hearing present now 
+  Pmhx: labyrinthitis, heart burn, nasal polyps
+  DH: Rennies PRN OTC, nasal spray PRN (pt not sure of name)
+  Allergies: latex allergy
+  No FH of note
+  Ex: no facial asymmetry, looks well, normal facial expressions and movements","n face has been feeling numb.
+Location - at home, is in a private place in which to consult, able to have a private confidential discussion.
+""I have been having problems with my hearing and face feeling numb for a couple of days.
+face feels numb.
+has been ongoing for 3 weeks.
+hearing has gone out of left ear.
+no facial asymmetry.
+no other symptoms.
+no weakness or numbness elsewhere in body.
+no difficulty swallowing.
+no difficulty speaking.
+no vision problems.
+feels like there is something missing.
+muffled hearing feeling in the air.
+no discharge.
+no fever.
+no pain in the air or from the ear.
+no itchiness in the ear.
+PMH - polyps in the nose.
+DH - nasal spray.
+NKDA.
+brother had neurofibromatosis.
+lives alone.
+works as a horse jockey.
+sometimes gets ringing in the ear when galloping.
+sometimes when gallops, hearing goes muffled.
+no pets.",3.6,2.0,5.2,3.0,5
+day2_consultation05,model_5,"(the above consultation reason doesn't correlate with the patient's presentation)
+  Hx: episodes of unilateral right hand numbness/ pins and needles, with some right leg weakness and noticeable gait disturbances, ongoing for 1.5 months
+  occurring with increasing frequency- initially once a week, now more often, occurring daily
+  symptoms not present now
+  no dysphagia, no dysphasia
+  no Pmhx of CVA/TIA
+  Father had CVA- appears to have had carotid endarterectomy
+  Non smoker, normal blood tests for diabetes/ cholesterol when checked a few years ago
+  PMHx and FH: otherwise nil of note
+  DH PT IS TAKING Aspirin daily on his own accord due to his FH
+  SH: pt is a medical doctor, plastic surgeon, lives with wife","Symptoms for the past month.
+Started with feeling tired for a couple of days and then gets back to normal.
+Then started losing feeling in the hand.
+Pins and needles in the right hand.
+Numbness is only in the hand and does not radiate up the arm.
+Feels like the arm is getting weaker.
+No involvement of leg.
+Walking slightly differently to normal every 3-4 days.
+Feeling tired and weak.
+At the same time, leg feels weaker.
+No abnormal gait.
+Fit and well.
+More regular now.
+Once a month initially but now twice a day.
+These episodes have been going on for 1.5-2 months.
+Episodes of weakness and numbness.
+Can't hold cup of coffee.
+Only during these episodes.
+No difficulty swallowing.
+No difficulty speaking.
+Wears glasses.
+Father had surgery to the side of neck to reduce risk of stroke.
+No history of mini strokes.
+DH: aspirin 75mg once a day.
+PMH: diabetes, BP, cholesterol.
+SH: working as a doctor.
+Allergies: penicillin.
+Lives with wife.
+Non smoker.",4.4,1.0,4.4,0.6,5
+day2_consultation06,model_5,"Worried about difficulty breathing and lip swelling, also localized rash
+  No PMHx of anaphylaxis, no use of epipen in past
+  Has had anxiety in past- felt panicked now
+  No Fh of note
+  SH: software engineer, has cat at home
+  Ex: Now: no lip swelling seen, speaking normally, no airways compromise. No rash seen on arm","You are calling from Babylon.
+You are in a private location for a confidential discussion.
+You are somewhere private and able to have a discussion confidentially.
+Current problem: difficulty breathing.
+stung by insect recently.
+rash on arm where stung.
+swelling in lips and tongue.
+This occurred a few minutes ago.
+no hx of anaphylaxis.
+never been given an epipen.
+no swelling of lips.
+Past medical history: nil.
+Allergies: penicillin.
+no family hx of acute illness.
+anxiety.
+Social history: Work: works as computer scientist.
+living alone.
+pets: cats.",1.4,0.6,3.6,1.4,5
+day2_consultation07,model_5,"Onset of chest pain earlier today during gardening (mild physical exertion)
+  Central chest, radiation to shoulder and neck
+  Associated nausea, sweatiness, palpitations
+  PAIN STILL PRESENT NOW
+  No previous similar episodes
+  Risk factors: chronic smoker, FH of IHD, Hypertension, overweight, moderate alcohol intake
+  DH: (mild) allergy to aspirin
+  (forgot to ask about other medication- LAS need to clarify)
+  SH: lives alone
+  Ex: haemodynamically stable now, at rest, seated, well perfused via video inspection, not SOB","You are in a private place at home and able to have a private confidential discussion.
+2 hours ago was gardening and felt a pressure on chest.
+feels like someone sitting on chest.
+feels sweaty, short of breath and feels like someone is sitting on his chest.
+symptoms still present.
+chest discomfort.
+diffuse chest pain.
+left arm and shoulder pain.
+not usual activity.
+not had this before.
+no palpitations.
+feels heart is beating faster than normal.
+no one else in house at the time.
+non smoker.
+been smoking for the past 15 years.
+h/o hypertension and diabetes.
+father had heart problems.
+drink 7-8 pints of alcohol per week.
+overweight.
+live alone.
+work - own a sushi shop.",2.6,0.8,4.4,1.4,5
+day2_consultation08,model_5,"Hx of fever for a week with associated sweatiness, body/muscle aches, nausea, fatigue, night sweats, hot/cold episodes
+  Drinking less cf normal
+  Taking ibuprofen and paracetamol otc- not helping, helps with temp slightly
+  No cough, sore throat, runny nose, ear pain.
+  No diarrhea, no neck stiffness, no headache (no more than usual- normal headache on top of head through looking at screen). No rash, no joint swelling (ongoing back pain), no dysuria or frequency.
+  Recent foreign travel- returned from Vietnam, took malaria prevention daily- cant remember medication, present there for a few weeks, rural and urban tourism, trekking and cycling.
+  Pmhx: nil of note, back pain- under physiotherapy, working diagnosis ? muscular/ posture
+  Fh: father has MI at age 68
+  DH: on cerazette
+  Nil allergies, hayfever
+  SH: works as a nurse, UTD with hep B etc, non smoker, moderate alcohol intake, moderate physical exercise","""Not been feeling so well recently, struggling with fever for the past week, hot and sweaty all the time, not feeling well"".
+7/7 hx of fever.
+no other symptoms.
+aching all over.
+muscles aching.
+feeling nauseous.
+not been able to eat very much.
+drinking small amounts.
+feeling tired.
+sweating at night.
+periods of when feeling hot and cold.
+taking otc ibuprofen and paracetamol.
+no cough or cold.
+no ear pain.
+no diarrhoea.
+no neck stiffness.
+no headache.
+no migraines.
+central headache.
+no rash.
+no swollen joints.
+no urinary symptoms.
+no painful urination.
+been abroad recently.
+went to Vietnam.
+took malaria preventive medication.
+Meds amlodipine daily.
+took another tablet on top of the first one.
+recently been on a cycling trip, quite adventurous - cycling through farmland.
+back pain for a while.
+under physiotherapist.
+father passed away in 60s.
+hayfever.
+allergies - hay fever.
+works as a nurse.
+non smoker.
+moderate alcohol intake.
+exercise - few times a week.",1.2,0.2,4.2,1.6,5
+day3_consultation03,model_5,"History : having lack of energy for the past 3 months 
+  You are also having loss of appetite 
+  You are lacking motivation 
+  You are complaining of breathlessness and some times associated with palpitations 
+  There is no chest pain 
+  You are not depressed or stressed 
+  Your bowels are normal 
+  You feel nauseous most of the time 
+  There is no vomiting 
+  You are also experiencing some weight loss in the past 6 months about a stone 
+  There is no history of acid reflux 
+  Past medical history: you suffer from underactive thyroid 
+  Medications: you have not been using the thyroxine for a while since you changed practice . You do not remember the last time you had your last set of bloods","You are in Babylon.
+You are somewhere private and able to have a discussion confidentially.
+Current problem: not having much appetite and little energy.
+started a while back.
+SOB, out of energy.
+appetite reduced.
+feels out of place, low in mood.
+work is ok. you like your work.
+loss of appetite.
+no weight loss.
+3.5 months ago.
+6 months ago.
+lost approx 1 stone.
+bowels ok.
+bowels ok. no diarrhoea.
+bowels ok. bowels ok. no diarrhoea.
+no blood.
+no mucus.
+shortness of breath.
+no cough.
+no chest pain.
+no palpitations.
+Past medical history: hypothyroidism.
+Medications: thyroxine.",2.6,0.4,6.0,1.4,5
+day3_consultation04,model_5,"History: Having breathlessness for 3-4 days 
+  Having to use the blue inhalers twice a day 
+  You normally use it only as and when 
+  You are also on the clenil and taking it everyday 2 puff twice a day 
+  You are having a cough but no sputum 
+  There is some wheezing 
+  Medical history : you had asthma since your childhood
+  You suffer from eczema . your last asthma attack was 3 years ago 
+  You have never needed anitibiotics or steroids 
+  You have never been hospitalized because of your asthma 
+  Your normal peak flow reading is 380
+  You don't have any allergies 
+  Medication : you also use hydrocortisone and cetraban for eczema","ID confirmed, you are at home, can speak confidentially, you are in a private location (Babylon), happy to have confidential conversation.
+2-3 days ago, was running with a friend, could talk to her but found herself short of breath.
+When walking briskly.
+Used blue inhaler but not helped.
+wheezing a bit, coughing.
+using it everyday.
+Salbutamol, SEPTA, hydrocortisone.
+History of eczema, asthma.
+Coughing and wheeze, no sputum.
+using salbutamol twice a day.
+not admitted to hospital.
+last asthma attack 3 to 4 years ago.
+no oral steroids in past.
+last asthma review with honours 2 years ago.
+asthma was pretty under control until now, just in last 2 to 3 days.
+not done a lap since symptoms started.
+peak flow reading - normal until 30.
+peak flow reading - normal until 30. no fever.
+peak flow reading - normal until 30. peak flow reading - normal until 30. no fever.
+hayfever.
+meds- nil.
+allergies- nil.",3.2,1.0,4.6,1.0,5
+day3_consultation05,model_5,"History : having dizziness for the past few hours 
+  You had sometime similar a month ago but only lasted 10 minutes 
+  You feel as though you are in a boat 
+  There is no recent viral illness 
+  There is a buzzing noise in your ears 
+  There is no hearing problems 
+  No ear discharge or ear pain 
+  You feel nauseous but not been sick 
+  There is no weakness of the arms and legs 
+  Past medical history #
+  You have premature ovarian failure and take HRT
+  There is no allergies","You confirmed your full name, DOB and address.
+You confirmed that you are in a private location and able to have a confidential conversation.
+Current problem: feeling dizzy.
+spiralling, unable to walk properly, ears buzzing, feeling off.
+Started 2 hours ago.
+This has been going on for a bit more now.
+You were at home, suddenly felt fuzzy and dizzy.
+no recent viral illness.
+no ear pain.
+no fever.
+can walk but not walking straight.
+feels like the room is moving.
+no weakness of arms and legs.
+Similar episode a month ago, lasted about 5-10 mins.
+Past medical history: premature ovarian failure, HRT.
+Allergies: NKDA.",0.8,0.0,3.4,0.2,5
+day4_consultation01,model_5,"PC: acute onset left sided chest discomfort / pressure, feels like someone sitting on his chest 7/10, radiating to the left shoulder and arm.
+  1-2 hours in duration, acute onset, 1st presentation started while gardening.
+  No radiation to the head. 
+  ‚ÑÖ nausea no vomiting since presentation
+  SOBAR
+  
+  HPC. longer term hx of reduced ADLs due to SOBOE, walking up hills / stairs with no chest discomfort. 
+  
+  PMHx - high cholesterol and high blood pressure. 
+  
+  
+  DHx - allergies aspirin.
+  
+  SHx - lives with wife at home, able to walk up stairs until previously","You confirmed your full name, DOB and address.
+You confirmed that you are in a private and confidential area and are able to have a private confidential discussion.
+Current problem: chest discomfort.
+2 hours ago was digging in the garden and felt a pressure in the centre of the chest.
+feels like something is sitting on the chest.
+You were doing nothing strenuous at the time.
+hobbies: gardening every other week.
+PMH: high cholesterol.
+Medications: nil.
+allergy: nil.
+shortness of breath.
+feeling light headed.
+breathing has remained the same.
+difficulty climbing stairs.
+no pain.
+no nausea.
+no vomiting.
+left shoulder pain radiating to back.
+no swallowing or drinking problems.
+no problems going to the loo.
+difficulty climbing upstairs and going uphill.
+Past medical history: high BP and high cholesterol.",3.4,0.8,3.4,0.6,5
+day4_consultation02,model_5,"PC. Headaches, loss of appetite, tingling, feel hot, palpitations, acute onset, at random times of the day while at work (lawyer)
+  
+  HPC: 
+  PC started when started new job (lawer, high stress, works in front of a computer)
+  Headaches:
+  - No pre aura, 
+  - Frontal
+  - No radiation
+  - Some nausea no vomiting,
+  - No pmhx of headache.
+  
+  Reduced appetite, with unintentional weight loss, loss of 5lbs 
+  Pins and needles in both arms, no radiation to legs, maintains motor and sense, no loss of function
+  Fevers with headaches 
+  Palpitations with mild SOBOE and SOBAR.
+  
+  
+  Symptoms occur at random times of the day while at work, with no pre-symptoms, sometimes together, sometimes individually.
+  
+  PMHx , hypothyroid. 
+  
+  DHx allergies - nil
+  Thyroxine. 
+  
+  SHx lawer , stressful job.","You are at home and ok to chat.
+You are in a private space and ok to talk.
+feels hot and has severe headaches.
+affecting work.
+tingling in arms especially when comes into elevator in the morning.
+feels heart is beating in the thoracic region.
+not happening at the same time.
+not sure when headache will start.
+usually at work in meeting or on laptop.
+frontal headache.
+stays there for a while.
+no nausea.
+feels a bit nauseous.
+not normally get headaches.
+started when changed jobs.
+works as a lawyer.
+lives in London.
+mostly when at work.
+50/50 sit at computer.
+was a lawyer before.
+works at a law firm.
+reduced appetite.
+has lost weight.
+unintentional.
+clothes feel looser.
+no unintentional weight loss.
+also noticed tingling both hands.
+feeling hot.
+feeling short of breath.
+no shortness of breath when exercising.
+short of breath once a day.
+loss of libido at home.
+pmh: hypothyroidism.
+meds: thyroxine.
+drink once a week.
+non smoker.
+never taken cocaine or marijuana.
+no allergies.",4.0,0.8,4.0,0.6,5
+day4_consultation04,model_5,"PC : sobar pmhx of childhood asthma and hayfever.
+  
+  HPC. 2 day history of wheezing and SOBAR, after cleaning dusty environment
+  No chest pain. No nausea,no vomiting, no problems e+d
+  SOB worse at night
+  Now having problems speaking in full sentences
+  
+  
+  PMH: As above.
+  
+  Dhx : allergy nils no regular medications.","2 days ago was cleaning the house and dust came out of the carpet.
+triggered by cleaning the house - pt thinks may be allergic to dust.
+2 days later still not going any better.
+getting a little worried about it now and would like to get it checked out.
+worse at night.
+worse today as finding it hard to breath and talk.
+feeling a bit short of breath.
+unable to complete sentences.
+no pain on taking a deep breath.
+no dizziness.
+eating and drinking well.
+PMH: asthma as a child, hayfever.
+does not see GP regularly for asthma.
+not taken anything for the wheeze.
+looks well.",0.0,0.2,3.0,0.2,5
+day4_consultation05,model_5,"PC; diarrhea and central abdominal pain for 3/7. Now unable to go to work due to frequency of bowel movements. No fevers
+  
+  HPC:
+  Diarrhea +++ 5-6 per day (more) only fluid no blood, feels as if there incomplete evacuation.
+  
+  ‚ÑÖ abdominal pain for since presentation, no radiation, mild to moderate tenderness, and cramping, E+D'ing causing nausea. Feeling of ‚Äúgas‚Äù
+  
+  Some vomiting, now unable to tolerate fluids and solids. Ate this morning but vomited immediately. Feels and looks dehydrated.
+  
+  No problems with breathing, no chest pain, no headache. 
+  
+  DHx : NKDA. 
+  
+  FHx : father has history of stomach Ca.","calling from Babylon.
+looks well.
+no fever/sweats.
+not sure what could have caused it.
+pain on defecation and some vomiting for the past 3 days.
+no vomiting.
+PMH: asthma, hayfever.
+DH: salbutamol, NKDA.
+now having pain and vomiting.
+not improved or worsened.
+diarrhoea for 3 days.
+needs to go very often.
+drinking plenty of water.
+no blood noticed.
+""diarrhoea"".
+abdominal pain.
+last vomited this morning.
+not eaten anything today.
+tried to eat something this morning but not sure if it was breakfast.
+had some clothes on and then vomited.
+no blood.
+no blood when vomited.
+some abdominal cramping.
+no chest pain.
+talking and walking ok. no fever.",4.8,1.2,6.2,0.6,5
+day4_consultation06,model_5,"Name and DOB confirmed
+  PC: presenting with headache - significant 
+  Sx. started this morning
+  Associated symptoms - dizzy / blurry vision - sudden onset headache - severity score - 6/10
+  New headache
+  Headache over left side of head 
+  Vision blurry - funny lines
+  Has tried paracetamol 3 hours ago- no improvement
+  Still having visual problems - some improvement
+  Looking at screens making sx. Worse
+  When moving sx. Worse
+  Has felt nauseous - and vomited x2
+  No neurological symptoms
+  
+  Unlikely to be pregnant
+  
+  Worried re: brain cancer or a stroke - wondering if needs to go to a&e
+  
+  Pmh: renal stones
+  
+  Dhx: nil regular,
+  NKDA
+  
+  Fhx: mother - migraines, Hypothyroidism
+  
+  Video assessment - appeared well - in a brightly lit environment - does not appear photophobic","started in the morning.
+vision is a bit blurry, painful and blurred.
+vision feels blurry and painful.
+getting concerned, especially as vision feels blurry.
+vision feels like it is blurry.
+feels like there is something wrong with the vision.
+vision feels a bit blurry.
+came on suddenly.
+worst pain in life - on a scale of 1-10. had kidney stone 6 months ago.
+never had a headache before.
+across the head.
+left side only.
+tried co-codamol - didn't help.
+visual problems still on going.
+feel a little bit dizzy.
+when move head feels worse.
+still feel nauseous and want to vomit.
+feels like about to vomit.
+pmh: kidney stones.
+mother has migraines.
+hypothyroidism in the family.
+meds: nil.
+nkda.
+worried about brain injury or stroke.
+no weakness in arms or legs.
+walking in a straight line.
+woke up with headache 4 hours ago.
+not behind the eye.",3.6,0.6,4.2,1.0,5
+day4_consultation07,model_5,"Name and DOB confirmed. 
+  Feeling unwell for 8 days. Started as a sore throat, then developed a cough, Dry. No sputum. Non productive. No blood. No chest pain. 
+  Mild SOB 
+  Not at rest. Not concerning or holding him back. 
+  Slight fever symptoms. 
+  Gradually improving. 
+  No Asthma
+  No sig PHMx. 
+  Reduced appatitie. No unintentional weight loss. 
+  No sig travel history. 
+  Non smoker.
+  
+  No Sig drug history
+  Fhx - Mother Lung Ca nil else. 
+  NKDA
+  Shx - No asbestos exposure. 
+  
+  Looks well
+  
+  Time off worse cert - But can self certify","calling from Babylon.
+safe and confidential place to talk.
+looks well.
+""Cough and sore throat for a week"".
+has been using OTC cough medicine but not helping much.
+sore throat came first then after day or two the cough started.
+dry cough.
+no shortness of breath.
+no chest pain.
+started with sore throat 1 week ago, developed into dry cough 3-4 days ago.
+cough worse at night time.
+able to walk up a flight of stairs.
+no other medical conditions or medical history.
+no history of asthma.
+mother had lung cancer.
+ex smoker - Amsterdam.
+Meds nil.
+NKDA.
+no recent travel to Europe.
+no recent sinus congestion.
+feeling hot and cold at first, but now feeling better.
+no significant weight loss.
+appetite ok, no weight loss.
+no rashes.
+no lumps or bumps around the neck.",5.2,1.0,6.8,1.4,5
+day4_consultation09,model_5,"Confirmed name
+  DOB
+  
+  Tight chest. 
+  3 hours
+  Slight SOB
+  Slight wheezy. 
+  Slight cough. 
+  Slight cold last week. Still symotoms of cold and cough has stayed. 
+  Non productive. 
+  Cough - worse at night. 
+  
+  - When young - asthma exacerbation aged 16yrs. 
+  
+  PMHx - Asthma. 
+  Hayfever 
+  Dust allergy. 
+  
+  Medications 
+  Ventolin - 
+  Clenil modulate - 
+  
+  NKDA
+  
+  Fhx - Mother - Excema. 
+  Father Asthma
+  
+  ICE - Inhalers","calling from Buffalo.
+chest tightness since this morning.
+chest tight feeling since this morning, no chest pain, no shortness of breath, no cough, no fever, no vomiting, not unwell in self.
+chest feels tight, no pain, no cough.
+looks well.
+Sore throat, runny nose.
+had a cold last week, feeling under the weather.
+still has symptoms of a cold.
+PMH: asthma, hayfever, dust allergy.
+DH: salbutamol inhaler.
+NKDA.
+not using inhaler as was away at uni last week.
+not on ventolin currently.
+FH: mother has eczema, father has asthma.
+non productive cough.
+cough worse at night time.
+tight chest, 3 hours.
+able to walk up stairs without getting short of breath.
+not short of breath at rest, no breathlessness, no wheeze.",4.8,1.2,5.0,1.4,5
+day5_consultation01,model_5,"Left sided headache since yesterday morning. Intermittent. Non positional. Not woken her up. No altered smell/taste. E&D normally. No prodromal illness, no viral symptoms, sore ears/coryzal sx. Doesn't feel feverish but hasn't checked temperature. No N&V. No tingling/numbness/weakness/rash. Worse with light but vision not altered. Taken paracetamol only. Period stopped last week.
+  No hx headaches.
+  PMH: Nil significant
+  DH: Microgynon - no SEs, BP was normal when checked for last prescription ? when.
+  FH: Mother has hypertension and migraines.
+  SH: Lives with flatmates, alcohol - few glasses wine at weekends, non smoker.
+  Some stress at work recently. ","Location - at home, is in a private place in which to consult, and confirmed place of privicay for consultation.
+HPC - woke up this morning with a throbbing headache.
+has not been able to leave the house.
+mainly on left side of head.
+feels like its popping, intense, comes and goes, sensitive to light.
+does not fade completely.
+no eye symptoms.
+no abnormal smells or tastes.
+no nausea or vomiting.
+has been eating and drinking ok.
+has been eating and drinking ok. no previous history of headaches.
+has been eating and drinking ok. has been eating and drinking ok. no previous history of headaches.
+no cold symptoms.
+no changes in skin.
+PC - headache.
+has been able to go to work.
+worse in bright light.
+not worse with any position.
+no cough or sneeze.
+Meds - nil.
+FH - mother - hypertension, migraines.
+lives with housemates, drink normal amount of alcohol.
+non smoker.
+Allergy - aspirin.",2.6,1.0,6.2,0.4,5
+day5_consultation011,model_5,"PC: R knee pain
+  
+  HPC: 2/52 R knee pain. Training for marathon. Currently up to 7-8 miles few times a week. Gym few x week. Had to stop running at 20 min point due to pain this week. 
+  Pain in front of knee and right side. No specific area tenderness. Has noticed puffiness of knee after exercise, used ice and this settled completely. No giving way/locking. No problems going up/downstairs or on normal walking. 
+  FROM. 
+  Generally feels pain is getting worse. 
+  Has had previous ice hockey injury and bruising afterwards.
+  No other jt pains, no general unwell/fever.
+  Has had tingling R side forefoot which settled down. Slight ankle swelling, indentation socks. No change in temp/colour.
+  No problems walking hard floors/pain in sole.
+  
+  PMH: LASIK, ? kidney stones.
+  
+  DHx: Vit D, melatonin, ibuprofen. Xanax sometimes . 
+  
+  SH: Has occ joint.","calling from Babylon.
+""Knee pain and clicking"".
+cannot run very far without feeling pain in knees and clicking.
+also gets tingling in toes.
+2 weeks hx of knee pain and clicking.
+no joint problems before.
+ice hockey injury few months ago - bruise.
+training for marathon - 7 mile runs.
+no giving way.
+pain starts after 20 mins.
+not sure kilometers and miles.
+can run through the pain.
+last few times had to stop.
+feels like it is getting worse.
+when doing abs - clicking heard.
+pain is located to right side of knee.
+looks well.
+no pain on flexion.
+some fluid on the knee.
+no pain when running.
+no problems going up and down stairs.
+able to fully straighten the knee.
+taking ibuprofen 400mg.
+no back pain.
+no swelling in the knee.
+some swelling in the calf.
+no swelling of the lower legs.
+no temperature of lower legs.
+some tingling and numbness in the toes after the run.
+no pain in the arch of the foot.
+no problems walking around.
+Meds - Ibuprofen.
+vitamin D. melatonin.
+acid reflux.",5.0,0.4,9.6,0.4,5
+day5_consultation012,model_5,"PC: Headache
+  
+  HPC L sided posterior headache. Started mid morning. 8/10 severity. No visual disturbance/visual floaters/tingling/numbness/weakness/nausea/vomiting/fever/neck stiffness. 
+  No worse cough/sneeze/bending. Did not wake her up in the night, slept ok . E&D fine. Finding it hard to concentrate on work.
+  
+  No headaches in the past. 
+  No change in diet/liestyle/increased stress.
+  
+  DH: Nil
+  
+  FMH: Mother hypertension
+  
+  SH: Lives with partner. Designer.","headache for 3 days.
+headache is getting worse.
+headache is frontal and occipital, feels like a pressure in the head.
+headache has been going on for 3 days, feels like its getting worse, feels dizzy and light headed.
+headache started yesterday.
+unusual for you to have a headache.
+left side of back.
+felt intense and throbbing.
+built up gradually over short period of time.
+no vomiting, no tingling, numbness or weakness.
+no blurred vision.
+eating and drinking normally.
+no vomiting.
+no fever.
+not shivery or sweaty.
+no rashes.
+not had this before.
+not taken any painkillers.
+last night managed to sleep ok. worse at the end of the day.
+nkda.
+not made any difference time of day.
+no pain on lying down, standing up, bending over.
+meds: nil.
+no hx of migraines.
+partner is a designer.
+no missed work.
+non smoker.
+no alcohol.
+no other drugs.",4.4,1.2,7.0,1.0,5
+day5_consultation02,model_5,"PC: Dysuria
+  HPC: 6/7 hx dysuria, burning stinging sensation when PUs. No problem with actually passing urine. Strong odour. E&D normally. No new PV discharge. No back/loin pain. Not feverish but not checked temp.No obvious trigger, no hx dehydration/frequent SI. 
+  No PHx urine infections/similar sx. 
+  No recent change in BH/blood in stool.
+  PMH: IBS
+  FH: Nil
+  DH: Mebeverine 200mg TDS. NKDA.
+  
+  SH: Lives with friends. Works as support worker. Non smoker. Drinks 1 unit/week.","calling from Babylon.
+you are in a private place and able to have a consultation today.
+hurts when peeing.
+has been going on for 3 days.
+6/7 hx of dysuria.
+unpleasant smell that comes out when passes urine.
+no lower back pain.
+pain in tummy.
+pain is in the middle.
+7/10NRS.
+some spotting of blood.
+able to pass water.
+able to eat and drink.
+not had these symptoms before.
+no vaginal discharge.
+regular periods.
+no medical problems.
+no kidney problems.
+no fever.
+no change in bowel habit.
+no weight loss.
+meds: nil.
+allergies: nil.
+lives with friends.
+works as support worker.
+occasionally drinks alcohol.
+non smoker.
+no feverish symptoms.",3.8,0.6,5.2,0.6,5
+day5_consultation07,model_5,"PC: Cough and cold.
+  HPC: 4-5 day hx runny nose, dry cough. No sputum/haemoptysis. No epistaxis/sinus pain. Feels hot, hasn't measured temperature. No SOB/inspiratory pain/wheeze. Aches and pains. No vomiting. E&D ok. PUing ok. 
+  No hx chest problems/recurrent chest infections/wt loss.
+  Thinks last BP was fine, can't remember when last BP/DM check up was. Doesn't check blood sugars/urine at home. 
+  No increased thirst/urinary freq.
+  Taking 2-3 lemsips a day which eases sx.
+  
+  PMH: Hypertension
+  T2 DM
+  
+  DH: Lisinopril 
+  Metformin
+  
+  Height- 5ft 5in
+  Weight - 65kg
+  
+  SH: Non smoker, odd sherry. Lives with partner and dog. Office manager.","Location - at home, is in a private place in which to consult.
+c/o dry cough, nasal congestion and nasal discharge.
+cough started 5 days ago.
+is coughing every 20-30 minutes at the moment.
+has been coughing a lot for 5 days.
+no chest tightness.
+no chest pain.
+no shortness of breath.
+no haemoptysis.
+pmh - type 2 DM.
+no blood in the sputum.
+green sputum, no blood visible.
+had been feeling hot and cold.
+no fever.
+had some diarrhoea but settled.
+has been holding down fluids.
+eating and drinking well.
+no rash.
+no headaches.
+does get wheezing on exertion.
+no chest infection.
+has hypertension and diabetes.
+meds - metformin.
+last BP check few weeks ago.
+no increased thirst.
+height - 5'5, weight - 65kg.
+non smoker.
+no alcohol.
+lives with partner and dog.
+works as office manager.
+has been using a difflam lamp.
+allergies - nil.",3.8,0.6,6.4,1.0,5
+day5_consultation08,model_5,"PC: Wheeze
+  
+  HPC: 2-3 hx wheeze. No fever, has checked temp - 37. Cold symptoms. Not coughing up sputum, no haemoptysis/CP. Not night time waking. Not exercising at the moment. Sometimes can't complete sentences but no SOB at rest, no problems walking upstairs. More wheezy walking to work. Doesn't have peak flow meter at home. Has missed a few days of work.
+  Hx asthma as a child, took inhalers ? what. Had hospital admissions and missed school. No ITU. Stopped medication 3-4 years ago but sometimes takes salbutamol still every few weeks. Needs salbutamol when exercises.
+  
+  PMH Asthma, Hayfever
+  
+  DH Salbutamol NKDA
+  
+  SH: Non smoker. 1U alcohol every 2-3 days. Lives with partner. Works as engineer.","Location - at home, is in a private place in which to consult, and confirmed place of privicay for consultation, and happy to continue with consultation.
+has been going on for 2-3 days.
+has had similar symptoms in the past, but not now.
+had asthma as a child, and hayfever.
+was quite bad as a child.
+takes asthma inhaler.
+has had to go to hospital with it.
+occasionally had to miss school.
+meds stopped at age of *.
+has had colds and coughs, and a fever.
+used to walk to work, but recently unable to do so, feels very short of breath, and difficult completing sentences.
+no sputum.
+no blood in cough.
+no chest pain.
+not woken at night.
+not been able to do exercise.
+does not have a peak flow meter at home.
+usually takes aspirin, but stopped this 3-4 years ago.
+last 3 to 4 years - took salbutamol.
+usually takes this once every few weeks.
+usually uses inhalers.
+has high fever.
+no energy.
+non smoker.
+drinking alcohol regularly.
+one glass of wine.
+lives with partner.
+has not been at work in last few days, used to walk home but recently work from home.
+feels short of breath when sitting or walking.
+can get up and down stairs ok. feels well in self.
+has been feeling short of breath for a few days.
+can find it hard to complete sentences.
+checked temperature - normal.
+NKDA.",4.8,0.6,3.6,1.2,5

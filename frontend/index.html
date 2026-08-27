@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CNFS Metric Demo</title>
+    <meta name="color-scheme" content="light dark" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%231f7a4d'/%3E%3Cpath d='M6 17h4l2.5-7 4 14 3-9h6.5' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <button
+      class="icon-button theme-toggle-float"
+      id="themeToggle"
+      type="button"
+      aria-pressed="false"
+      aria-label="Switch to dark theme"
+      title="Toggle theme"
+    >
+      <svg class="icon-sun" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="4"></circle>
+        <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"></path>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+    <main class="page">
+      <section class="panel" id="evaluatePanel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Evaluate a note pair</p>
+            <h2>Ground truth vs. generated note</h2>
+          </div>
+          <p class="section-note">Plain text or JSON sections (problem_list, subjective, objective, assessment, plan) are both accepted.</p>
+        </div>
+        <div class="input-grid">
+          <div class="input-field">
+            <div class="input-field-head">
+              <label for="groundTruthInput">Ground truth note</label>
+              <div class="field-actions">
+                <button class="text-button" type="button" data-reset-for="groundTruthInput">Load sample</button>
+                <button class="text-button" type="button" data-clear-for="groundTruthInput">Clear</button>
+              </div>
+            </div>
+            <textarea id="groundTruthInput" rows="14" spellcheck="false">Problem List:
+- Diabetes mellitus
+- Hypertension
+- Hypercholesterolemia
+- Foot pain
+
+Subjective:
+Patient reports persistent foot pain in multiple areas limiting movement, monitors blood sugar without a meter, and notes recent readings of 6.8 then 6.3. She mentions blood pressure readings, a recent value of 136/86, and a history of high cholesterol treated with a high-dose medication. Labs show hemoglobin 14, normal kidney function, and adequate vitamin D and B12 levels. No episodes of hypoglycemia or anemia are reported.
+
+Objective:
+Blood pressure 136/86 mmHg. Recent blood glucose 6.3 (units not specified). Hemoglobin 14 g/dL. Kidney function within normal limits. Vitamin D and vitamin B12 levels normal. No anemia noted.
+
+Assessment:
+Diabetes mellitus is currently controlled. Hypertension is controlled. Hypercholesterolemia remains elevated despite high-dose statin therapy. Foot pain is likely musculoskeletal in origin.
+
+Plan:
+Continue current diabetes regimen. Continue antihypertensive therapy. Reduce statin dose from 40 mg to 10 mg daily, taken each day preferably at bedtime. Follow up in three months.</textarea>
+          </div>
+          <div class="input-field">
+            <div class="input-field-head">
+              <label for="generatedInput">Generated note</label>
+              <div class="field-actions">
+                <button class="text-button" type="button" data-reset-for="generatedInput">Load sample</button>
+                <button class="text-button" type="button" data-clear-for="generatedInput">Clear</button>
+              </div>
+            </div>
+            <textarea id="generatedInput" rows="14" spellcheck="false">Problem List:
+- Diabetes mellitus
+- Hypertension
+- Hyperlipidemia
+- foot pain
+
+Subjective:
+Patient reports ongoing foot pain that affects movement. She checks her blood sugar and reports recent readings around 6.3. She also reports a recent blood pressure reading of 136/86. She has a history of elevated cholesterol and is taking cholesterol medication. She denies hypoglycemic episodes.
+
+Objective:
+Blood pressure is 136/86 mmHg. Blood glucose is 6.3. Hemoglobin is 14 g/dL. Kidney function is normal. Vitamin D and B12 are within normal limits.
+
+Assessment:
+Diabetes mellitus is controlled. Hypertension is controlled. Hyperlipidemia is improving on statin therapy. Foot pain is likely musculoskeletal.
+
+Plan:
+Continue diabetes medications. Continue blood pressure medications. Continue statin therapy at bedtime. Follow up in three weeks.</textarea>
+          </div>
+        </div>
+        <div class="evaluate-bar">
+          <button class="primary-button" id="evaluateBtn" type="button">
+            <svg class="btn-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M6 3l14 9-14 9V3z"></path>
+            </svg>
+            <span class="btn-label">Evaluate</span>
+            <span class="btn-spinner" aria-hidden="true"></span>
+          </button>
+          <p class="evaluate-hint muted" id="evaluateHint" role="status" aria-live="polite">
+            Runs the real evaluator against OpenAI &mdash; usually takes 30&ndash;90 seconds. (Ctrl/Cmd+Enter to run)
+          </p>
+        </div>
+        <p class="error-banner" id="evaluateError" role="alert" hidden></p>
+      </section>
+
+      <section class="overview">
+        <article class="score-card">
+          <div class="card-topline">
+            <p class="label">Overall Fidelity Score</p>
+            <span class="score-status" id="scoreStatus">Not run</span>
+          </div>
+          <div class="score-line" role="status" aria-live="polite">
+            <strong id="overallScore">&ndash;&ndash;</strong>
+            <span>/100</span>
+          </div>
+          <div class="score-meter" aria-hidden="true">
+            <span id="scoreMeterFill" style="--score: 0"></span>
+          </div>
+        </article>
+
+        <article class="stat-card">
+          <strong id="statGroundTruth">&ndash;</strong>
+          <span>Ground-truth facts</span>
+          <small>Reference content</small>
+        </article>
+        <article class="stat-card">
+          <strong id="statGenerated">&ndash;</strong>
+          <span>Generated facts</span>
+          <small>LLM output</small>
+        </article>
+        <article class="stat-card">
+          <strong id="statEvents">&ndash;</strong>
+          <span>Clinical events</span>
+          <small>Review separately</small>
+        </article>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Calculation breakdown</p>
+            <h2>How the score is calculated</h2>
+          </div>
+        </div>
+
+        <div class="calculation-grid">
+          <div class="calc-card">
+            <h3>Fact counts</h3>
+            <dl class="calc-list">
+              <div><dt>Correct</dt><dd id="factCorrect">&ndash;</dd></div>
+              <div><dt>Partial</dt><dd id="factPartial">&ndash;</dd></div>
+              <div><dt>Missing</dt><dd id="factMissing">&ndash;</dd></div>
+              <div><dt>Incorrect</dt><dd id="factIncorrect">&ndash;</dd></div>
+              <div><dt>Contradictions</dt><dd id="factContradictions">&ndash;</dd></div>
+            </dl>
+          </div>
+
+          <div class="calc-card">
+            <h3>Completeness</h3>
+            <p class="calc-formula" id="completenessFormula">&ndash;</p>
+            <strong id="completenessValue">&ndash;</strong>
+          </div>
+
+          <div class="calc-card">
+            <h3>Correctness</h3>
+            <p class="calc-formula" id="correctnessFormula">&ndash;</p>
+            <strong id="correctnessValue">&ndash;</strong>
+          </div>
+        </div>
+
+        <div class="weighted-table-wrap">
+          <table class="weighted-table">
+            <thead>
+              <tr>
+                <th>Dimension</th>
+                <th>Score</th>
+                <th>Weight</th>
+                <th>Contribution</th>
+              </tr>
+            </thead>
+            <tbody id="weightedRows"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="3">Overall Fidelity Score</td>
+                <td id="tfootScore">&ndash;</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">This evaluation</p>
+            <h2>Fact-by-fact comparison</h2>
+          </div>
+          <div class="facts-filter">
+            <label for="factsFilter">Filter</label>
+            <select id="factsFilter">
+              <option value="all">All facts</option>
+              <option value="CORRECT">Correct</option>
+              <option value="PARTIAL">Partial</option>
+              <option value="MISSING">Missing</option>
+              <option value="INCORRECT">Incorrect</option>
+              <option value="CONTRADICTION">Contradiction</option>
+              <option value="UNSUPPORTED">Unsupported</option>
+            </select>
+          </div>
+        </div>
+        <p class="section-note">
+          Every ground-truth fact matched against the generated note, plus generated content not found in the reference note.
+        </p>
+        <div class="facts-table-wrap">
+          <table class="facts-table">
+            <thead>
+              <tr>
+                <th>Status</th>
+                <th>Concept</th>
+                <th>Section</th>
+                <th>Ground truth</th>
+                <th>Generated</th>
+                <th>Reason</th>
+              </tr>
+            </thead>
+            <tbody id="factsTableBody">
+              <tr class="facts-empty-row">
+                <td colspan="6" class="muted">Run an evaluation to see fact-by-fact results.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Clinical Error Profile</p>
+            <h2>Events to review</h2>
+          </div>
+        </div>
+        <div class="events" id="eventList"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

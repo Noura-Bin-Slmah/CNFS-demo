@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "clinical-note-metric"
+version = "0.1.0"
+description = "Clinical Note Fidelity Score for fact-level medical note evaluation"
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2.7,<3", "openai>=1.0,<2"]
+
+[project.optional-dependencies]
+test = ["pytest>=8.0,<9"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-p no:cacheprovider"
