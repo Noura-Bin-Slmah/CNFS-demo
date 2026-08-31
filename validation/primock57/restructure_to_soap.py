@@ -105,7 +105,7 @@ def main() -> None:
     from openai import OpenAI
 
     client = OpenAI()
-    model = os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini")
+    model = os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini-2025-04-14")
 
     notes = load_unique_notes()
     done = already_done()

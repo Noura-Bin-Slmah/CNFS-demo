@@ -39,7 +39,7 @@ Unsupported generated facts are not penalized when they are supported by a provi
 from clinical_note_metric import ClinicalNoteEvaluator, MetricConfig, OpenAIJudgeClient
 
 evaluator = ClinicalNoteEvaluator(
-    config=MetricConfig(model="gpt-4.1-mini"),
+    config=MetricConfig(model="gpt-4.1-mini-2025-04-14"),
     llm_client=OpenAIJudgeClient(),
 )
 result = evaluator.evaluate(
@@ -65,7 +65,7 @@ python run_cnfs.py
 Optionally choose a model:
 
 ```powershell
-$env:CNFS_OPENAI_MODEL = "gpt-4.1-mini"
+$env:CNFS_OPENAI_MODEL = "gpt-4.1-mini-2025-04-14"
 python run_cnfs.py
 ```
 
@@ -76,7 +76,7 @@ from clinical_note_metric import ClinicalNoteEvaluator, MetricConfig, OpenAIJudg
 
 evaluator = ClinicalNoteEvaluator(
     config=MetricConfig(
-        model="gpt-4.1-mini",
+        model="gpt-4.1-mini-2025-04-14",
         temperature=0.0,
     ),
     llm_client=OpenAIJudgeClient(),

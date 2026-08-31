@@ -33,7 +33,7 @@ class OpenAIJudgeClient:
     ) -> str | dict[str, Any]:
         """Generate a JSON response from OpenAI."""
 
-        resolved_model = model or "gpt-4.1-mini"
+        resolved_model = model or "gpt-4.1-mini-2025-04-14"
         kwargs: dict[str, Any] = {
             "model": resolved_model,
             "instructions": system_prompt,

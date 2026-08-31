@@ -97,8 +97,8 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--model",
-        default=os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini"),
-        help="OpenAI model name. Defaults to CNFS_OPENAI_MODEL or gpt-4.1-mini.",
+        default=os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini-2025-04-14"),
+        help="OpenAI model name. Defaults to CNFS_OPENAI_MODEL or gpt-4.1-mini-2025-04-14.",
     )
     return parser.parse_args()
 

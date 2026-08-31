@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import json
 import logging
+from concurrent.futures import ThreadPoolExecutor
 
 from clinical_note_metric.config import MetricConfig
 from clinical_note_metric.judge import JsonLLMJudge, LLMClient
@@ -16,8 +18,9 @@ from clinical_note_metric.models import (
     FactMatch,
     GeneratedFactClassification,
     MatchClassification,
+    SectionPlacementIssue,
 )
-from clinical_note_metric.prompts import SINGLE_CALL_EVALUATION_PROMPT
+from clinical_note_metric.prompts import FACT_EXTRACTION_PROMPT, MATCH_AND_CLASSIFY_PROMPT
 from clinical_note_metric.scoring import CNFSScorer
 from clinical_note_metric.section_evaluator import SectionEvaluator
 
@@ -46,7 +49,7 @@ class ClinicalNoteEvaluator:
         self.config.use_llm_matching = True
         self.judge = JsonLLMJudge(llm_client, self.config)
         self.scorer = CNFSScorer(self.config)
-        self.section_evaluator = SectionEvaluator()
+        self.section_evaluator = SectionEvaluator(self.config)
 
     def evaluate(
         self,
@@ -57,16 +60,38 @@ class ClinicalNoteEvaluator:
     ) -> CNFSResult:
         """Run the complete CNFS pipeline and return a structured result."""
 
-        gt_facts, generated_facts, matches, extras, clinical_error_events, judge_summary = self._single_call_judgment(
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            gt_future = pool.submit(
+                self._extract_facts,
+                note_text=ground_truth_note,
+                note_role="ground-truth",
+                note_role_title="Ground-truth",
+                id_prefix="gt",
+            )
+            gen_future = pool.submit(
+                self._extract_facts,
+                note_text=generated_note,
+                note_role="generated",
+                note_role_title="Generated",
+                id_prefix="gen",
+            )
+            gt_facts = gt_future.result()
+            generated_facts = gen_future.result()
+
+        matches, extras, clinical_error_events, section_placement_issues = self._match_and_classify(
             ground_truth_note=ground_truth_note,
             generated_note=generated_note,
             transcript=transcript,
+            gt_facts=gt_facts,
+            generated_facts=generated_facts,
         )
         scores = self.scorer.dimension_scores(matches, extras, len(generated_facts))
         fidelity_score = self.scorer.base_score(scores)
         final_score = fidelity_score
 
-        counts = self._counts(gt_facts, generated_facts, matches, extras, clinical_error_events)
+        counts = self._counts(
+            gt_facts, generated_facts, matches, extras, clinical_error_events, section_placement_issues
+        )
         section_scores = self.section_evaluator.evaluate(matches, extras)
         limitations = []
         if transcript is None:
@@ -78,8 +103,7 @@ class ClinicalNoteEvaluator:
             f"CNFS {final_score:.1f}/100 from {len(gt_facts)} ground-truth facts and "
             f"{len(generated_facts)} generated facts; {counts.unsupported} unsupported, "
             f"{counts.missing} missing, {counts.contradictions} contradictions, "
-            f"{counts.clinical_error_events} clinical error events. "
-            f"{judge_summary}".strip()
+            f"{counts.clinical_error_events} clinical error events."
         )
 
         return CNFSResult(
@@ -93,6 +117,7 @@ class ClinicalNoteEvaluator:
             fact_matches=matches,
             unsupported_facts=extras,
             clinical_error_events=clinical_error_events,
+            section_placement_issues=section_placement_issues,
             transcript_used=transcript is not None,
             limitations=limitations,
             summary=summary,
@@ -102,25 +127,20 @@ class ClinicalNoteEvaluator:
             + [extra.reason for extra in extras],
         )
 
-    def _single_call_judgment(
+    def _extract_facts(
         self,
         *,
-        ground_truth_note: str,
-        generated_note: str,
-        transcript: str | None,
-    ) -> tuple[
-        list[ClinicalFact],
-        list[ClinicalFact],
-        list[FactMatch],
-        list[ExtraGeneratedFact],
-        list[ClinicalErrorEvent],
-        str,
-    ]:
-        prompt = SINGLE_CALL_EVALUATION_PROMPT.format(
+        note_text: str,
+        note_role: str,
+        note_role_title: str,
+        id_prefix: str,
+    ) -> list[ClinicalFact]:
+        prompt = FACT_EXTRACTION_PROMPT.format(
             prompt_version=self.config.prompt_version,
-            ground_truth_note=ground_truth_note,
-            generated_note=generated_note,
-            transcript=transcript or "None provided",
+            note_role=note_role,
+            note_role_title=note_role_title,
+            id_prefix=id_prefix,
+            note_text=note_text,
         )
 
         last_error: ValueError | None = None
@@ -128,37 +148,75 @@ class ClinicalNoteEvaluator:
         for _attempt in range(self.config.llm_retry_attempts + 1):
             payload = self.judge.ask_json(prompt + repair_instruction)
             try:
-                return self._parse_single_call_payload(payload)
+                return self._parse_extraction_payload(payload, id_prefix=id_prefix)
+            except ValueError as exc:
+                last_error = exc
+                repair_instruction = (
+                    "\n\nYour previous JSON was incomplete or invalid. "
+                    f"Fix this exact issue: {exc}. Return the full corrected JSON again."
+                )
+        raise ValueError(
+            f"Fact extraction for the {note_role} note remained invalid after retries."
+        ) from last_error
+
+    @staticmethod
+    def _parse_extraction_payload(payload: dict, *, id_prefix: str) -> list[ClinicalFact]:
+        raw_facts = payload.get("facts")
+        if not isinstance(raw_facts, list):
+            raise ValueError("extraction output is missing a 'facts' list")
+        return [
+            ClinicalFact.model_validate({**raw, "id": raw.get("id") or f"{id_prefix}_{index:04d}"})
+            for index, raw in enumerate(raw_facts, start=1)
+        ]
+
+    def _match_and_classify(
+        self,
+        *,
+        ground_truth_note: str,
+        generated_note: str,
+        transcript: str | None,
+        gt_facts: list[ClinicalFact],
+        generated_facts: list[ClinicalFact],
+    ) -> tuple[list[FactMatch], list[ExtraGeneratedFact], list[ClinicalErrorEvent], list[SectionPlacementIssue]]:
+        gt_by_id = {fact.id: fact for fact in gt_facts}
+        gen_by_id = {fact.id: fact for fact in generated_facts}
+
+        def _compact(facts: list[ClinicalFact]) -> list[dict]:
+            return [
+                {"id": f.id, "section": f.section, "concept": f.concept, "evidence_text": f.evidence_text}
+                for f in facts
+            ]
+
+        prompt = MATCH_AND_CLASSIFY_PROMPT.format(
+            prompt_version=self.config.prompt_version,
+            ground_truth_note=ground_truth_note,
+            generated_note=generated_note,
+            transcript=transcript or "None provided",
+            ground_truth_facts_json=json.dumps(_compact(gt_facts), indent=2),
+            generated_facts_json=json.dumps(_compact(generated_facts), indent=2),
+        )
+
+        last_error: ValueError | None = None
+        repair_instruction = ""
+        for _attempt in range(self.config.llm_retry_attempts + 1):
+            payload = self.judge.ask_json(prompt + repair_instruction)
+            try:
+                return self._parse_match_payload(payload, gt_by_id=gt_by_id, gen_by_id=gen_by_id)
             except ValueError as exc:
                 last_error = exc
                 repair_instruction = (
                     "\n\nYour previous JSON was incomplete or invalid for CNFS. "
                     f"Fix this exact issue: {exc}. Return the full corrected JSON again."
                 )
-        raise ValueError("Single-call LLM judgment remained incomplete after retries.") from last_error
+        raise ValueError("Match-and-classify judgment remained incomplete after retries.") from last_error
 
     @staticmethod
-    def _parse_single_call_payload(
+    def _parse_match_payload(
         payload: dict,
-    ) -> tuple[
-        list[ClinicalFact],
-        list[ClinicalFact],
-        list[FactMatch],
-        list[ExtraGeneratedFact],
-        list[ClinicalErrorEvent],
-        str,
-    ]:
-        gt_facts = [
-            ClinicalFact.model_validate({**raw, "id": raw.get("id") or f"gt_{index:04d}"})
-            for index, raw in enumerate(payload.get("ground_truth_facts", []), start=1)
-        ]
-        generated_facts = [
-            ClinicalFact.model_validate({**raw, "id": raw.get("id") or f"gen_{index:04d}"})
-            for index, raw in enumerate(payload.get("generated_facts", []), start=1)
-        ]
-        gt_by_id = {fact.id: fact for fact in gt_facts}
-        gen_by_id = {fact.id: fact for fact in generated_facts}
-
+        *,
+        gt_by_id: dict[str, ClinicalFact],
+        gen_by_id: dict[str, ClinicalFact],
+    ) -> tuple[list[FactMatch], list[ExtraGeneratedFact], list[ClinicalErrorEvent], list[SectionPlacementIssue]]:
         matches: list[FactMatch] = []
         used_generated_ids: set[str] = set()
         for raw_match in payload.get("fact_matches", []):
@@ -167,14 +225,20 @@ class ClinicalNoteEvaluator:
                 continue
             generated_id = raw_match.get("generated_fact_id")
             gen_fact = gen_by_id.get(generated_id) if generated_id else None
+            classification = MatchClassification(raw_match.get("classification", "MISSING"))
+            if classification != MatchClassification.MISSING and gen_fact is None:
+                raise ValueError(
+                    f"fact_matches entry for {gt_fact.id} has classification {classification} "
+                    "but no valid generated_fact_id — a non-MISSING classification requires an "
+                    "actual matched generated fact in the same section."
+                )
             if gen_fact:
                 used_generated_ids.add(gen_fact.id)
             matches.append(
                 FactMatch(
                     ground_truth_fact=gt_fact,
                     generated_fact=gen_fact,
-                    classification=MatchClassification(raw_match.get("classification", "MISSING")),
-                    section_score=float(raw_match.get("section_score", 0.0 if gen_fact is None else 1.0)),
+                    classification=classification,
                     reason=str(raw_match.get("reason", "LLM semantic judgment.")),
                 )
             )
@@ -195,12 +259,12 @@ class ClinicalNoteEvaluator:
 
         missing_gt_ids = set(gt_by_id) - {match.ground_truth_fact.id for match in matches}
         if missing_gt_ids:
-            raise ValueError(f"single-call output omitted ground-truth facts: {sorted(missing_gt_ids)}")
+            raise ValueError(f"match-and-classify output omitted ground-truth facts: {sorted(missing_gt_ids)}")
 
         unaccounted_generated_ids = set(gen_by_id) - used_generated_ids
         if unaccounted_generated_ids:
             raise ValueError(
-                "single-call output omitted generated facts: "
+                "match-and-classify output omitted generated facts: "
                 f"{sorted(unaccounted_generated_ids)}"
             )
 
@@ -210,14 +274,21 @@ class ClinicalNoteEvaluator:
             gen_by_id,
         )
 
-        return (
-            gt_facts,
-            generated_facts,
-            matches,
-            extras,
-            clinical_error_events,
-            str(payload.get("judge_summary", "")).strip(),
-        )
+        section_placement_issues: list[SectionPlacementIssue] = []
+        for raw_issue in payload.get("section_placement_issues", []):
+            gt_fact = gt_by_id.get(raw_issue.get("ground_truth_fact_id"))
+            gen_fact = gen_by_id.get(raw_issue.get("generated_fact_id"))
+            if gt_fact is None or gen_fact is None:
+                continue
+            section_placement_issues.append(
+                SectionPlacementIssue(
+                    ground_truth_fact=gt_fact,
+                    generated_fact=gen_fact,
+                    reason=str(raw_issue.get("reason", "LLM identified a section placement mismatch.")),
+                )
+            )
+
+        return matches, extras, clinical_error_events, section_placement_issues
 
     @staticmethod
     def _parse_clinical_error_events(
@@ -272,7 +343,9 @@ class ClinicalNoteEvaluator:
         return deduped
 
     @staticmethod
-    def _counts(gt_facts, generated_facts, matches, extras, clinical_error_events) -> CountBreakdown:
+    def _counts(
+        gt_facts, generated_facts, matches, extras, clinical_error_events, section_placement_issues
+    ) -> CountBreakdown:
         return CountBreakdown(
             ground_truth_facts=len(gt_facts),
             generated_facts=len(generated_facts),
@@ -293,4 +366,5 @@ class ClinicalNoteEvaluator:
                 == GeneratedFactClassification.SUPPORTED_BUT_ABSENT_FROM_GT
             ),
             clinical_error_events=len(clinical_error_events),
+            section_placement_issues=len(section_placement_issues),
         )

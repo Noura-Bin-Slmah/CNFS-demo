@@ -1,27 +1,82 @@
+import threading
+
 import pytest
 
 from clinical_note_metric import ClinicalNoteEvaluator, MetricConfig
 from clinical_note_metric.models import ClinicalFact
 
 
-class SingleCallFakeLLMClient:
+def _call_kind(user_prompt: str) -> str:
+    """Classify which of the three evaluator prompts was sent."""
+
+    if "Match already-extracted clinical facts" in user_prompt:
+        return "match"
+    if "single ground-truth medical note" in user_prompt:
+        return "extract_gt"
+    if "single generated medical note" in user_prompt:
+        return "extract_gen"
+    raise AssertionError(f"Unrecognized prompt shape: {user_prompt[:200]!r}")
+
+
+def _extract_segment(text: str, start_marker: str, end_marker: str) -> str:
+    return text.split(start_marker, 1)[1].split(end_marker, 1)[0].strip()
+
+
+def _note_text_from_extraction_prompt(user_prompt: str, note_role_title: str) -> str:
+    return user_prompt.split(f"{note_role_title} note:\n", 1)[1].strip()
+
+
+def _notes_and_transcript_from_match_prompt(user_prompt: str) -> tuple[str, str, str]:
+    gt_note = _extract_segment(
+        user_prompt,
+        "the ground-truth facts list below is the\nauthoritative inventory of its clinical facts):\n",
+        "\n\nGenerated note (context only",
+    )
+    gen_note = _extract_segment(
+        user_prompt,
+        "the generated facts list below is the\nauthoritative inventory of its clinical facts):\n",
+        "\n\nTranscript, if provided:",
+    )
+    transcript = _extract_segment(
+        user_prompt,
+        "Transcript, if provided:\n",
+        "\n\nGround-truth facts (authoritative",
+    )
+    return gt_note, gen_note, transcript
+
+
+class FakeLLMClient:
+    """Fake judge that answers the evaluator's three real prompts:
+    ground-truth extraction, generated extraction, and match-and-classify.
+    """
+
     def __init__(self, *, omit_extra_once: bool = False):
         self.calls = 0
+        self.match_calls = 0
         self.omit_extra_once = omit_extra_once
+        self._lock = threading.Lock()
 
     def generate_json(self, *, system_prompt, user_prompt, model, temperature):
-        self.calls += 1
-        if "Evaluate a generated medical note" not in user_prompt:
-            raise AssertionError("Evaluator should use the single-call prompt only.")
-        payload = self._payload(user_prompt)
-        if self.omit_extra_once and self.calls == 1 and payload["unsupported_facts"]:
+        with self._lock:
+            self.calls += 1
+        kind = _call_kind(user_prompt)
+        if kind == "extract_gt":
+            note = _note_text_from_extraction_prompt(user_prompt, "Ground-truth")
+            return {"facts": self._facts(note, "gt")}
+        if kind == "extract_gen":
+            note = _note_text_from_extraction_prompt(user_prompt, "Generated")
+            return {"facts": self._facts(note, "gen")}
+
+        with self._lock:
+            self.match_calls += 1
+            is_first_match_call = self.match_calls == 1
+        gt_note, gen_note, transcript = _notes_and_transcript_from_match_prompt(user_prompt)
+        payload = self._match_payload(gt_note, gen_note, transcript)
+        if self.omit_extra_once and is_first_match_call and payload["unsupported_facts"]:
             payload["unsupported_facts"] = payload["unsupported_facts"][:-1]
         return payload
 
-    def _payload(self, prompt):
-        gt_note = self._between(prompt, "Ground-truth note:", "Generated note:")
-        gen_note = self._between(prompt, "Generated note:", "Transcript, if provided:")
-        transcript = prompt.split("Transcript, if provided:", 1)[1]
+    def _match_payload(self, gt_note, gen_note, transcript):
         gt_facts = self._facts(gt_note, "gt")
         gen_facts = self._facts(gen_note, "gen")
         transcript_facts = self._facts(transcript, "transcript")
@@ -29,8 +84,15 @@ class SingleCallFakeLLMClient:
         matches = []
 
         for gt_fact in gt_facts:
+            # Matching is scoped to the same section only, per the real prompt design.
             candidate = next(
-                (fact for fact in gen_facts if fact["concept"] == gt_fact["concept"] and fact["id"] not in used),
+                (
+                    fact
+                    for fact in gen_facts
+                    if fact["concept"] == gt_fact["concept"]
+                    and fact["section"] == gt_fact["section"]
+                    and fact["id"] not in used
+                ),
                 None,
             )
             if candidate is None:
@@ -39,9 +101,8 @@ class SingleCallFakeLLMClient:
                         "ground_truth_fact_id": gt_fact["id"],
                         "generated_fact_id": None,
                         "classification": "MISSING",
-                        "section_score": 0,
                         "detail_score": 0,
-                        "reason": "No generated fact matched.",
+                        "reason": "No generated fact matched in this section.",
                     }
                 )
                 continue
@@ -52,7 +113,6 @@ class SingleCallFakeLLMClient:
                     "ground_truth_fact_id": gt_fact["id"],
                     "generated_fact_id": candidate["id"],
                     "classification": classification,
-                    "section_score": 1 if gt_fact["section"] == candidate["section"] else 0,
                     "detail_score": detail,
                     "reason": reason,
                 }
@@ -72,18 +132,47 @@ class SingleCallFakeLLMClient:
                 }
             )
 
+        section_placement_issues = self._section_placement_issues(matches, unsupported, gt_facts, gen_facts)
+
         return {
-            "ground_truth_facts": gt_facts,
-            "generated_facts": gen_facts,
             "fact_matches": matches,
             "unsupported_facts": unsupported,
             "clinical_error_events": self._clinical_error_events(matches, gt_facts, gen_facts),
-            "judge_summary": "Single-call fake judgment.",
+            "section_placement_issues": section_placement_issues,
         }
 
     @staticmethod
-    def _between(text, start, end):
-        return text.split(start, 1)[1].split(end, 1)[0].strip()
+    def _section_placement_issues(matches, unsupported, gt_facts, gen_facts):
+        gt_by_id = {f["id"]: f for f in gt_facts}
+        gen_by_id = {f["id"]: f for f in gen_facts}
+        missing_gt = [gt_by_id[m["ground_truth_fact_id"]] for m in matches if m["classification"] == "MISSING"]
+        unsupported_gen = [gen_by_id[u["generated_fact_id"]] for u in unsupported if u["classification"] == "UNSUPPORTED"]
+
+        issues = []
+        used_gen_ids = set()
+        for gt_fact in missing_gt:
+            counterpart = next(
+                (
+                    g
+                    for g in unsupported_gen
+                    if g["concept"] == gt_fact["concept"] and g["id"] not in used_gen_ids
+                ),
+                None,
+            )
+            if counterpart is None:
+                continue
+            used_gen_ids.add(counterpart["id"])
+            issues.append(
+                {
+                    "ground_truth_fact_id": gt_fact["id"],
+                    "generated_fact_id": counterpart["id"],
+                    "reason": (
+                        f"Ground truth expected this in {gt_fact['section']}; "
+                        f"generated note documented it in {counterpart['section']} instead."
+                    ),
+                }
+            )
+        return issues
 
     def _facts(self, note, prefix):
         lowered = note.lower()
@@ -184,65 +273,71 @@ class SingleCallFakeLLMClient:
 
 
 class StatinAnemiaRegressionLLMClient:
+    _GT_FACTS = [
+        {
+            "id": "gt_0001",
+            "section": "Assessment",
+            "concept": "hypercholesterolemia status",
+            "value": "elevated despite high-dose statin therapy",
+            "status": "abnormal",
+            "negation": False,
+            "evidence_text": "Hypercholesterolemia remains elevated despite high-dose statin therapy.",
+            "is_safety_relevant": True,
+        },
+        {
+            "id": "gt_0002",
+            "section": "Plan",
+            "concept": "statin dose plan",
+            "value": "reduce statin from 40 mg to 10 mg daily",
+            "status": "planned",
+            "negation": False,
+            "dose": "40 mg to 10 mg",
+            "medication_name": "statin",
+            "evidence_text": "Reduce statin from 40 mg to 10 mg daily.",
+            "is_safety_relevant": True,
+        },
+        {
+            "id": "gt_0003",
+            "section": "Objective",
+            "concept": "anemia",
+            "value": "absent",
+            "status": "absent",
+            "negation": True,
+            "evidence_text": "No anemia noted.",
+            "is_safety_relevant": False,
+        },
+    ]
+    _GEN_FACTS = [
+        {
+            "id": "gen_0001",
+            "section": "Assessment",
+            "concept": "hyperlipidemia status",
+            "value": "improving on statin therapy",
+            "status": "present",
+            "negation": False,
+            "evidence_text": "Hyperlipidemia is improving on statin therapy.",
+            "is_safety_relevant": True,
+        },
+        {
+            "id": "gen_0002",
+            "section": "Plan",
+            "concept": "statin dose plan",
+            "value": "continue statin therapy at bedtime",
+            "status": "planned",
+            "negation": False,
+            "medication_name": "statin",
+            "evidence_text": "Continue statin therapy at bedtime.",
+            "is_safety_relevant": True,
+        },
+    ]
+
     def generate_json(self, *, system_prompt, user_prompt, model, temperature):
+        kind = _call_kind(user_prompt)
+        if kind == "extract_gt":
+            return {"facts": self._GT_FACTS}
+        if kind == "extract_gen":
+            return {"facts": self._GEN_FACTS}
         return {
-            "ground_truth_facts": [
-                {
-                    "id": "gt_0001",
-                    "section": "Assessment",
-                    "concept": "hypercholesterolemia status",
-                    "value": "elevated despite high-dose statin therapy",
-                    "status": "abnormal",
-                    "negation": False,
-                    "evidence_text": "Hypercholesterolemia remains elevated despite high-dose statin therapy.",
-                    "is_safety_relevant": True,
-                },
-                {
-                    "id": "gt_0002",
-                    "section": "Plan",
-                    "concept": "statin dose plan",
-                    "value": "reduce statin from 40 mg to 10 mg daily",
-                    "status": "planned",
-                    "negation": False,
-                    "dose": "40 mg to 10 mg",
-                    "medication_name": "statin",
-                    "evidence_text": "Reduce statin from 40 mg to 10 mg daily.",
-                    "is_safety_relevant": True,
-                },
-                {
-                    "id": "gt_0003",
-                    "section": "Objective",
-                    "concept": "anemia",
-                    "value": "absent",
-                    "status": "absent",
-                    "negation": True,
-                    "evidence_text": "No anemia noted.",
-                    "is_safety_relevant": False,
-                },
-            ],
-            "generated_facts": [
-                {
-                    "id": "gen_0001",
-                    "section": "Assessment",
-                    "concept": "hyperlipidemia status",
-                    "value": "improving on statin therapy",
-                    "status": "present",
-                    "negation": False,
-                    "evidence_text": "Hyperlipidemia is improving on statin therapy.",
-                    "is_safety_relevant": True,
-                },
-                {
-                    "id": "gen_0002",
-                    "section": "Plan",
-                    "concept": "statin dose plan",
-                    "value": "continue statin therapy at bedtime",
-                    "status": "planned",
-                    "negation": False,
-                    "medication_name": "statin",
-                    "evidence_text": "Continue statin therapy at bedtime.",
-                    "is_safety_relevant": True,
-                },
-            ],
             "fact_matches": [
                 {
                     "ground_truth_fact_id": "gt_0001",
@@ -284,37 +379,43 @@ class StatinAnemiaRegressionLLMClient:
                     "evidence_text": "Reduce statin from 40 mg to 10 mg daily. Continue statin therapy at bedtime.",
                 }
             ],
-            "judge_summary": "Regression case with statin plan mismatch and ordinary missing anemia fact.",
         }
 
 
 class LLMSeverityJudgmentClient:
     def generate_json(self, *, system_prompt, user_prompt, model, temperature):
+        kind = _call_kind(user_prompt)
+        if kind == "extract_gt":
+            return {
+                "facts": [
+                    {
+                        "id": "gt_0001",
+                        "section": "Plan",
+                        "concept": "drug allergy",
+                        "value": "penicillin allergy",
+                        "status": "present",
+                        "negation": False,
+                        "evidence_text": "Patient has penicillin allergy.",
+                        "is_safety_relevant": True,
+                    }
+                ]
+            }
+        if kind == "extract_gen":
+            return {
+                "facts": [
+                    {
+                        "id": "gen_0001",
+                        "section": "Plan",
+                        "concept": "drug allergy",
+                        "value": "no known drug allergies",
+                        "status": "absent",
+                        "negation": True,
+                        "evidence_text": "No known drug allergies.",
+                        "is_safety_relevant": True,
+                    }
+                ]
+            }
         return {
-            "ground_truth_facts": [
-                {
-                    "id": "gt_0001",
-                    "section": "Plan",
-                    "concept": "drug allergy",
-                    "value": "penicillin allergy",
-                    "status": "present",
-                    "negation": False,
-                    "evidence_text": "Patient has penicillin allergy.",
-                    "is_safety_relevant": True,
-                }
-            ],
-            "generated_facts": [
-                {
-                    "id": "gen_0001",
-                    "section": "Plan",
-                    "concept": "drug allergy",
-                    "value": "no known drug allergies",
-                    "status": "absent",
-                    "negation": True,
-                    "evidence_text": "No known drug allergies.",
-                    "is_safety_relevant": True,
-                }
-            ],
             "fact_matches": [
                 {
                     "ground_truth_fact_id": "gt_0001",
@@ -340,14 +441,13 @@ class LLMSeverityJudgmentClient:
                     "evidence_text": "Patient has penicillin allergy. No known drug allergies.",
                 }
             ],
-            "judge_summary": "LLM-provided clinical event severity.",
         }
 
 
 def evaluator(client=None, config=None):
     return ClinicalNoteEvaluator(
         config=config or MetricConfig(),
-        llm_client=client or SingleCallFakeLLMClient(),
+        llm_client=client or FakeLLMClient(),
     )
 
 
@@ -371,19 +471,19 @@ def test_clinical_fact_normalizes_llm_status_variants():
     assert fact.status == "present"
 
 
-def test_single_call_judge_paraphrase_match():
-    client = SingleCallFakeLLMClient()
+def test_judge_paraphrase_match():
+    client = FakeLLMClient()
     result = evaluator(client).evaluate(
         ground_truth_note="Nasal discharge for 2 days.",
         generated_note="Two-day history of rhinorrhea.",
     )
 
-    assert client.calls == 1
+    assert client.calls == 3  # extract gt + extract generated + match/classify
     assert result.counts.correct == 1
     assert result.final_score == 100
 
 
-def test_single_call_judge_detects_negation_error():
+def test_judge_detects_negation_error():
     result = evaluator().evaluate(
         ground_truth_note="No cough.",
         generated_note="Patient reports cough.",
@@ -393,7 +493,7 @@ def test_single_call_judge_detects_negation_error():
     assert any(event.type == "NEGATION_ERROR" for event in result.clinical_error_events)
 
 
-def test_single_call_judge_detects_missing_medication_detail():
+def test_judge_detects_missing_medication_detail():
     result = evaluator().evaluate(
         ground_truth_note="Plan: Apply Fucidin twice daily for one week.",
         generated_note="Plan: Apply Fucidin.",
@@ -403,7 +503,7 @@ def test_single_call_judge_detects_missing_medication_detail():
     assert result.scores.correctness < 100
 
 
-def test_single_call_judge_supports_transcript_absent_from_gt():
+def test_judge_supports_transcript_absent_from_gt():
     result = evaluator().evaluate(
         ground_truth_note="Nasal discharge.",
         generated_note="Nasal discharge with cough.",
@@ -443,14 +543,33 @@ def test_configurable_weights_still_apply_after_llm_judgment():
     assert result.final_score == 0
 
 
-def test_single_call_judgment_retries_when_generated_fact_is_omitted():
-    client = SingleCallFakeLLMClient(omit_extra_once=True)
+def test_section_placement_issue_reported_for_cross_section_match():
+    # Same content, different section between the two notes: matching must
+    # stay scoped to each fact's own section (so this shows up as genuinely
+    # MISSING in Plan and UNSUPPORTED in Assessment), while the separate
+    # reconciliation pass still surfaces the cross-section correspondence
+    # without changing either classification.
+    result = evaluator().evaluate(
+        ground_truth_note="Plan: Apply Fucidin twice daily for one week.",
+        generated_note="Assessment: Apply Fucidin twice daily for one week.",
+    )
+
+    assert result.counts.missing == 1
+    assert result.counts.unsupported == 1
+    assert len(result.section_placement_issues) == 1
+    issue = result.section_placement_issues[0]
+    assert issue.ground_truth_fact.section == "Plan"
+    assert issue.generated_fact.section == "Assessment"
+
+
+def test_match_and_classify_retries_when_generated_fact_is_omitted():
+    client = FakeLLMClient(omit_extra_once=True)
     result = evaluator(client=client, config=MetricConfig(llm_retry_attempts=1)).evaluate(
         ground_truth_note="Nasal discharge.",
         generated_note="Nasal discharge. Patient reports cough.",
     )
 
-    assert client.calls == 2
+    assert client.match_calls == 2  # first match attempt was incomplete, retry succeeded
     assert result.counts.unsupported == 1
 
 

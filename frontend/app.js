@@ -2,7 +2,6 @@ const DIMENSIONS_META = [
   { key: "completeness", weightKey: "completeness", label: "Completeness", defaultWeight: 0.3 },
   { key: "correctness", weightKey: "correctness", label: "Correctness", defaultWeight: 0.4 },
   { key: "supportedContent", weightKey: "supported_content", label: "Supported Content", defaultWeight: 0.2 },
-  { key: "sectionPlacement", weightKey: "section_placement", label: "Section Placement", defaultWeight: 0.1 },
 ];
 
 const SEVERITY_CLASS = {
@@ -49,6 +48,8 @@ const generatedInput = document.querySelector("#generatedInput");
 const statGroundTruth = document.querySelector("#statGroundTruth");
 const statGenerated = document.querySelector("#statGenerated");
 const statEvents = document.querySelector("#statEvents");
+const statPlacementIssues = document.querySelector("#statPlacementIssues");
+const placementIssueList = document.querySelector("#placementIssueList");
 const factCorrect = document.querySelector("#factCorrect");
 const factPartial = document.querySelector("#factPartial");
 const factMissing = document.querySelector("#factMissing");
@@ -60,6 +61,9 @@ const correctnessFormula = document.querySelector("#correctnessFormula");
 const correctnessValue = document.querySelector("#correctnessValue");
 const factsTableBody = document.querySelector("#factsTableBody");
 const factsFilter = document.querySelector("#factsFilter");
+const sectionRows = document.querySelector("#sectionRows");
+const floatingTooltip = document.querySelector("#floatingTooltip");
+const SECTION_ORDER = ["Problem List", "Subjective", "Objective", "Assessment", "Plan"];
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -71,6 +75,59 @@ function escapeHtml(value) {
   return String(value ?? "").replace(/[&<>"']/g, (ch) => (
     { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[ch]
   ));
+}
+
+function showFloatingTooltip(trigger) {
+  const text = trigger.dataset.tooltip;
+  if (!text) return;
+  floatingTooltip.textContent = text;
+  // Measure off-screen first (still laid out, just not painted at a real
+  // position yet) so we know its real size before deciding where it fits.
+  floatingTooltip.classList.add("is-visible");
+  const triggerRect = trigger.getBoundingClientRect();
+  const tooltipRect = floatingTooltip.getBoundingClientRect();
+  const gap = 8;
+  const viewportPad = 8;
+
+  let top = triggerRect.top - tooltipRect.height - gap;
+  if (top < viewportPad) {
+    // Not enough room above (e.g. the first row of a table) — flip below.
+    top = triggerRect.bottom + gap;
+  }
+  const maxTop = window.innerHeight - tooltipRect.height - viewportPad;
+  if (top > maxTop) top = Math.max(viewportPad, maxTop);
+
+  let left = triggerRect.left;
+  const maxLeft = window.innerWidth - tooltipRect.width - viewportPad;
+  if (left > maxLeft) left = maxLeft;
+  if (left < viewportPad) left = viewportPad;
+
+  floatingTooltip.style.top = `${top}px`;
+  floatingTooltip.style.left = `${left}px`;
+}
+
+function hideFloatingTooltip() {
+  floatingTooltip.classList.remove("is-visible");
+}
+
+function initFloatingTooltips() {
+  document.addEventListener("mouseover", (event) => {
+    const trigger = event.target.closest(".tooltip[data-tooltip]");
+    if (trigger) showFloatingTooltip(trigger);
+  });
+  document.addEventListener("mouseout", (event) => {
+    const trigger = event.target.closest(".tooltip[data-tooltip]");
+    if (trigger) hideFloatingTooltip();
+  });
+  document.addEventListener("focusin", (event) => {
+    const trigger = event.target.closest(".tooltip[data-tooltip]");
+    if (trigger) showFloatingTooltip(trigger);
+  });
+  document.addEventListener("focusout", (event) => {
+    const trigger = event.target.closest(".tooltip[data-tooltip]");
+    if (trigger) hideFloatingTooltip();
+  });
+  window.addEventListener("scroll", hideFloatingTooltip, true);
 }
 
 function buildDimensions(scores, weights) {
@@ -152,6 +209,7 @@ function renderOverview(data) {
   statGroundTruth.textContent = data ? data.counts.groundTruthFacts : "–";
   statGenerated.textContent = data ? data.counts.generatedFacts : "–";
   statEvents.textContent = data ? data.counts.clinicalErrorEvents : "–";
+  statPlacementIssues.textContent = data ? data.counts.sectionPlacementIssues : "–";
 }
 
 function formatEventType(type) {
@@ -179,6 +237,26 @@ function renderEvents(events) {
     .join("");
 }
 
+function renderPlacementIssues(issues) {
+  if (!issues || issues.length === 0) {
+    placementIssueList.innerHTML = `<p class="muted">No section placement mismatches were detected for this note pair.</p>`;
+    return;
+  }
+  placementIssueList.innerHTML = issues
+    .map(
+      (issue) => `
+        <div class="event event-warning">
+          <h3>
+            <span>${escapeHtml(issue.concept)}</span>
+            <span class="badge warning">${escapeHtml(issue.expectedSection)} &rarr; ${escapeHtml(issue.actualSection)}</span>
+          </h3>
+          <p>${escapeHtml(issue.reason)}</p>
+        </div>
+      `
+    )
+    .join("");
+}
+
 function renderCalcBreakdown(data) {
   if (!data) {
     factCorrect.textContent = "–";
@@ -190,6 +268,7 @@ function renderCalcBreakdown(data) {
     completenessValue.textContent = "–";
     correctnessFormula.textContent = "–";
     correctnessValue.textContent = "–";
+    renderSectionScores(null);
     return;
   }
   const c = data.counts;
@@ -199,28 +278,86 @@ function renderCalcBreakdown(data) {
   factIncorrect.textContent = c.incorrect;
   factContradictions.textContent = c.contradictions;
 
-  const attempted = c.groundTruthFacts - c.missing;
-  completenessFormula.textContent = `(${c.correct} + 0.5 x ${c.partial}) / ${c.groundTruthFacts} x 100`;
+  completenessFormula.textContent = "average of each section's completeness (see below)";
   completenessValue.textContent = data.scores.completeness.toFixed(1);
-  correctnessFormula.textContent = `(${c.correct} + 0.5 x ${c.partial}) / ${attempted} x 100`;
+  correctnessFormula.textContent = "average of each section's correctness (see below)";
   correctnessValue.textContent = data.scores.correctness.toFixed(1);
+
+  renderSectionScores(data.sectionScores, data.weights);
+}
+
+function tooltipCell(displayValue, formulaText, extraClass = "") {
+  return `
+    <td>
+      <span class="tooltip ${extraClass}" tabindex="0" data-tooltip="${escapeHtml(formulaText)}">
+        ${displayValue}
+      </span>
+    </td>
+  `;
+}
+
+function renderSectionScores(sectionScores, weights) {
+  if (!sectionScores) {
+    sectionRows.innerHTML = "";
+    return;
+  }
+  const w = weights || {};
+  const wCompleteness = w.completeness ?? 0.3;
+  const wCorrectness = w.correctness ?? 0.4;
+  const wSupported = w.supported_content ?? 0.2;
+  const totalWeight = wCompleteness + wCorrectness + wSupported;
+
+  sectionRows.innerHTML = SECTION_ORDER.map((section) => {
+    const s = sectionScores[section];
+    if (!s || s.factCount === 0) {
+      return `
+        <tr class="muted">
+          <td>${escapeHtml(section)}</td>
+          <td>0</td>
+          <td colspan="4">No ground-truth facts in this section &mdash; excluded from the overall average.</td>
+        </tr>
+      `;
+    }
+
+    const attempted = s.factCount - s.missingCount;
+    const completenessFormula =
+      `Completeness = (${s.correctCount}×1.0 + ${s.partialCount}×0.5) / ${s.factCount} facts × 100\n` +
+      `= ${s.completeness.toFixed(1)}`;
+    const correctnessFormula = attempted
+      ? `Correctness = (${s.correctCount}×1.0 + ${s.partialCount}×0.5) / ${attempted} attempted × 100\n` +
+        `= ${s.correctness.toFixed(1)}`
+      : `Correctness = 100 (no facts were attempted — all missing)`;
+    const supportedFormula = s.generatedFactCount
+      ? `Supported = (1 − ${s.unsupportedCount} unsupported / ${s.generatedFactCount} generated) × 100\n` +
+        `= ${s.supportedContent.toFixed(1)}`
+      : `Supported = 100 (no generated facts in this section)`;
+    const overallFormula =
+      `Overall = (${s.completeness.toFixed(1)}×${wCompleteness} + ${s.correctness.toFixed(1)}×${wCorrectness} + ${s.supportedContent.toFixed(1)}×${wSupported}) / ${totalWeight.toFixed(2)}\n` +
+      `= ${s.overall.toFixed(1)}`;
+    const detailsTooltip =
+      `Correct: ${s.correctCount}\nPartial: ${s.partialCount}\nMissing: ${s.missingCount}\n` +
+      `Incorrect: ${s.incorrectCount}\nContradictions: ${s.contradictionCount}\nUnsupported: ${s.unsupportedCount}`;
+
+    return `
+      <tr>
+        <td>
+          <span class="tooltip tooltip-left section-name-tooltip" tabindex="0" data-tooltip="${escapeHtml(detailsTooltip)}">
+            ${escapeHtml(section)}
+            <span class="tooltip-icon">i</span>
+          </span>
+        </td>
+        <td>${s.factCount}</td>
+        ${tooltipCell(s.completeness.toFixed(1), completenessFormula)}
+        ${tooltipCell(s.correctness.toFixed(1), correctnessFormula)}
+        ${tooltipCell(s.supportedContent.toFixed(1), supportedFormula)}
+        ${tooltipCell(`<strong>${s.overall.toFixed(1)}</strong>`, overallFormula)}
+      </tr>
+    `;
+  }).join("");
 }
 
 function renderSectionCell(row) {
-  const gt = row.groundTruthSection;
-  const gen = row.generatedSection;
-
-  if (gt && gen && gt !== gen) {
-    const score = row.sectionScore;
-    const meta = score >= 1 ? { cls: "success", label: "OK" } : { cls: "danger", label: "Wrong section" };
-    return `
-      <div class="section-cell">
-        <span class="section-path">${escapeHtml(gt)} → ${escapeHtml(gen)}</span>
-        <span class="badge ${meta.cls}" title="Section placement score: ${score}">${escapeHtml(meta.label)}</span>
-      </div>
-    `;
-  }
-  return escapeHtml(gt || gen || "—");
+  return escapeHtml(row.groundTruthSection || row.generatedSection || "—");
 }
 
 function renderFactsTable(factMatches) {
@@ -348,6 +485,7 @@ async function runEvaluation() {
     renderCalcBreakdown(data);
     renderFactsTable(data.factMatches);
     renderEvents(data.events);
+    renderPlacementIssues(data.sectionPlacementIssues);
     renderWeightedRows();
     animateValue(0, data.overallScore, 700, (value) => setScore(value, "done"));
   } catch (err) {
@@ -438,9 +576,11 @@ initTheme();
 initInputPersistence();
 initFieldActions();
 initKeyboardShortcut();
+initFloatingTooltips();
 renderWeightedRows();
 renderOverview(null);
 renderEvents(null);
+renderPlacementIssues(null);
 renderCalcBreakdown(null);
 renderFactsTable(null);
 setScore(0, "idle");

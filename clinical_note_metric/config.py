@@ -9,7 +9,6 @@ DEFAULT_WEIGHTS = {
     "completeness": 0.30,
     "correctness": 0.40,
     "supported_content": 0.20,
-    "section_placement": 0.10,
 }
 
 
@@ -26,14 +25,6 @@ class MetricConfig(BaseModel):
     use_llm_matching: bool = True
     lexical_normalization: dict[str, str] = Field(default_factory=dict)
     semantic_match_threshold: float = 0.72
-    acceptable_section_pairs: set[tuple[str, str]] = Field(
-        default_factory=lambda: {
-            ("Problem List", "Assessment"),
-            ("Assessment", "Problem List"),
-            ("Assessment", "Plan"),
-            ("Plan", "Assessment"),
-        }
-    )
 
     @field_validator("weights")
     @classmethod

@@ -278,7 +278,7 @@ h3 {
 
 .overview {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) repeat(3, minmax(150px, 1fr));
+  grid-template-columns: minmax(0, 2fr) repeat(4, minmax(150px, 1fr));
   gap: 14px;
   margin-bottom: 14px;
 }
@@ -523,9 +523,9 @@ h3 {
 
 .calc-formula {
   margin-bottom: 10px;
-  color: var(--text);
+  color: var(--muted);
   font-family: Cambria, "Times New Roman", serif;
-  font-size: 20px;
+  font-size: 13px;
 }
 
 .calc-list {
@@ -603,6 +603,69 @@ h3 {
 
 .weighted-table tbody tr:hover {
   background: var(--panel-soft);
+}
+
+.tooltip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  cursor: help;
+  border-bottom: 1px dotted var(--muted);
+}
+
+.tooltip-left {
+  justify-content: flex-start;
+}
+
+.section-name-tooltip {
+  border-bottom: none;
+}
+
+.tooltip-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 9px;
+  font-weight: 700;
+  font-style: normal;
+  cursor: help;
+  flex-shrink: 0;
+}
+
+/* Positioned in JS relative to the viewport (not the table), so it can
+   never get clipped by a scrolling ancestor and can flip above/below
+   depending on available space. */
+.floating-tooltip {
+  position: fixed;
+  top: -9999px;
+  left: -9999px;
+  background: var(--text);
+  color: var(--panel);
+  padding: 9px 11px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: pre-line;
+  width: max-content;
+  max-width: 280px;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity 120ms ease;
+  z-index: 1000;
+  pointer-events: none;
+  text-align: left;
+}
+
+.floating-tooltip.is-visible {
+  opacity: 1;
 }
 
 .facts-filter {

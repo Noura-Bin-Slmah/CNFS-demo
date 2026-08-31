@@ -143,14 +143,13 @@ class ClinicalFact(BaseModel):
 
 
 class FactMatch(BaseModel):
-    """Classification of one ground-truth fact against generated facts."""
+    """Classification of one ground-truth fact against a generated fact in the same section."""
 
     model_config = ConfigDict(use_enum_values=True)
 
     ground_truth_fact: ClinicalFact
     generated_fact: ClinicalFact | None = None
     classification: MatchClassification
-    section_score: float = 0.0
     reason: str
 
 
@@ -161,6 +160,19 @@ class ExtraGeneratedFact(BaseModel):
 
     generated_fact: ClinicalFact
     classification: GeneratedFactClassification
+    reason: str
+
+
+class SectionPlacementIssue(BaseModel):
+    """A ground-truth fact marked MISSING in its own section whose content was
+    actually found in a different section of the generated note. Informational
+    only — does not change any classification or score, the same way a
+    clinical error event is reported separately from the fidelity score."""
+
+    model_config = ConfigDict(use_enum_values=True)
+
+    ground_truth_fact: ClinicalFact
+    generated_fact: ClinicalFact
     reason: str
 
 
@@ -187,7 +199,6 @@ class ScoreBreakdown(BaseModel):
     completeness: float
     correctness: float
     supported_content: float
-    section_placement: float
 
 
 class CountBreakdown(BaseModel):
@@ -201,11 +212,18 @@ class CountBreakdown(BaseModel):
     unsupported: int
     supported_but_absent_from_gt: int
     clinical_error_events: int
+    section_placement_issues: int
 
 
 class SectionScore(BaseModel):
+    fact_count: int = 0
+    generated_fact_count: int = 0
     completeness: float = 100.0
     correctness: float = 100.0
+    supported_content: float = 100.0
+    overall: float = 100.0
+    correct_fact_count: int = 0
+    partial_fact_count: int = 0
     unsupported_fact_count: int = 0
     missing_fact_count: int = 0
     incorrect_fact_count: int = 0
@@ -226,6 +244,7 @@ class CNFSResult(BaseModel):
     fact_matches: list[FactMatch]
     unsupported_facts: list[ExtraGeneratedFact]
     clinical_error_events: list[ClinicalErrorEvent]
+    section_placement_issues: list[SectionPlacementIssue] = Field(default_factory=list)
     transcript_used: bool
     limitations: list[str] = Field(default_factory=list)
     summary: str

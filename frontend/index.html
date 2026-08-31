@@ -136,6 +136,11 @@ Continue diabetes medications. Continue blood pressure medications. Continue sta
           <span>Clinical events</span>
           <small>Review separately</small>
         </article>
+        <article class="stat-card">
+          <strong id="statPlacementIssues">&ndash;</strong>
+          <span>Placement issues</span>
+          <small>Review separately</small>
+        </article>
       </section>
 
       <section class="panel">
@@ -190,6 +195,22 @@ Continue diabetes medications. Continue blood pressure medications. Continue sta
             </tfoot>
           </table>
         </div>
+
+        <div class="weighted-table-wrap" style="margin-top: 1.5rem;">
+          <table class="weighted-table">
+            <thead>
+              <tr>
+                <th>Section</th>
+                <th>Facts</th>
+                <th>Completeness</th>
+                <th>Correctness</th>
+                <th>Supported</th>
+                <th>Overall</th>
+              </tr>
+            </thead>
+            <tbody id="sectionRows"></tbody>
+          </table>
+        </div>
       </section>
 
       <section class="panel">
@@ -211,9 +232,6 @@ Continue diabetes medications. Continue blood pressure medications. Continue sta
             </select>
           </div>
         </div>
-        <p class="section-note">
-          Every ground-truth fact matched against the generated note, plus generated content not found in the reference note.
-        </p>
         <div class="facts-table-wrap">
           <table class="facts-table">
             <thead>
@@ -244,7 +262,19 @@ Continue diabetes medications. Continue blood pressure medications. Continue sta
         </div>
         <div class="events" id="eventList"></div>
       </section>
+
+      <section class="panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Section Placement Profile</p>
+            <h2>Content found in a different section than expected</h2>
+          </div>
+        </div>
+        <div class="events" id="placementIssueList"></div>
+      </section>
     </main>
+
+    <div id="floatingTooltip" class="floating-tooltip" role="tooltip"></div>
 
     <script src="app.js"></script>
   </body>

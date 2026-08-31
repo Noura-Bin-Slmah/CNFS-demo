@@ -28,7 +28,7 @@ from clinical_note_metric.config import MetricConfig  # noqa: E402
 from clinical_note_metric.evaluator import ClinicalNoteEvaluator  # noqa: E402
 from clinical_note_metric.openai_client import OpenAIJudgeClient  # noqa: E402
 
-DEFAULT_MODEL = os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini")
+DEFAULT_MODEL = os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini-2025-04-14")
 
 GROUND_TRUTH_CSV = os.path.join(os.path.dirname(__file__), "data", "ground_truth.csv")
 GENERATED_CSV = os.path.join(os.path.dirname(__file__), "data", "generated.csv")

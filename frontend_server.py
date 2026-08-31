@@ -16,7 +16,7 @@ from clinical_note_metric import ClinicalNoteEvaluator, MetricConfig, OpenAIJudg
 from run_cnfs import load_env_file, load_note_text, validate_openai_key
 
 FRONTEND_DIR = Path(__file__).resolve().parent / "frontend"
-DEFAULT_MODEL = os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini")
+DEFAULT_MODEL = os.getenv("CNFS_OPENAI_MODEL", "gpt-4.1-mini-2025-04-14")
 
 
 def evaluate_notes(ground_truth_note: str, generated_note: str, transcript: str | None) -> dict:
@@ -36,7 +36,6 @@ def evaluate_notes(ground_truth_note: str, generated_note: str, transcript: str 
             "concept": match.ground_truth_fact.concept,
             "groundTruthSection": match.ground_truth_fact.section,
             "generatedSection": match.generated_fact.section if match.generated_fact else None,
-            "sectionScore": match.section_score if match.generated_fact else None,
             "groundTruth": match.ground_truth_fact.evidence_text,
             "generated": match.generated_fact.evidence_text if match.generated_fact else None,
             "reason": match.reason,
@@ -48,7 +47,6 @@ def evaluate_notes(ground_truth_note: str, generated_note: str, transcript: str 
             "concept": extra.generated_fact.concept,
             "groundTruthSection": None,
             "generatedSection": extra.generated_fact.section,
-            "sectionScore": None,
             "groundTruth": None,
             "generated": extra.generated_fact.evidence_text,
             "reason": extra.reason,
@@ -64,9 +62,25 @@ def evaluate_notes(ground_truth_note: str, generated_note: str, transcript: str 
             "completeness": result.scores.completeness,
             "correctness": result.scores.correctness,
             "supportedContent": result.scores.supported_content,
-            "sectionPlacement": result.scores.section_placement,
         },
         "weights": dict(evaluator.config.weights),
+        "sectionScores": {
+            section: {
+                "factCount": section_score.fact_count,
+                "generatedFactCount": section_score.generated_fact_count,
+                "completeness": section_score.completeness,
+                "correctness": section_score.correctness,
+                "supportedContent": section_score.supported_content,
+                "overall": section_score.overall,
+                "correctCount": section_score.correct_fact_count,
+                "partialCount": section_score.partial_fact_count,
+                "missingCount": section_score.missing_fact_count,
+                "incorrectCount": section_score.incorrect_fact_count,
+                "contradictionCount": section_score.contradiction_count,
+                "unsupportedCount": section_score.unsupported_fact_count,
+            }
+            for section, section_score in result.section_scores.items()
+        },
         "counts": {
             "groundTruthFacts": result.counts.ground_truth_facts,
             "generatedFacts": result.counts.generated_facts,
@@ -77,10 +91,22 @@ def evaluate_notes(ground_truth_note: str, generated_note: str, transcript: str 
             "contradictions": result.counts.contradictions,
             "unsupported": result.counts.unsupported,
             "clinicalErrorEvents": result.counts.clinical_error_events,
+            "sectionPlacementIssues": result.counts.section_placement_issues,
         },
         "events": [
             {"type": event.type, "severity": event.severity, "reason": event.reason}
             for event in result.clinical_error_events
+        ],
+        "sectionPlacementIssues": [
+            {
+                "concept": issue.ground_truth_fact.concept,
+                "expectedSection": issue.ground_truth_fact.section,
+                "actualSection": issue.generated_fact.section,
+                "groundTruth": issue.ground_truth_fact.evidence_text,
+                "generated": issue.generated_fact.evidence_text,
+                "reason": issue.reason,
+            }
+            for issue in result.section_placement_issues
         ],
         "factMatches": fact_rows,
     }
