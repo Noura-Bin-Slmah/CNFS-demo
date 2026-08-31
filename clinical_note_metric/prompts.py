@@ -492,6 +492,21 @@ it:
   describe the same clinical content — do not create an entry for a
   coincidental topical resemblance (two different findings that just
   happen to concern the same condition).
+  Worked example (topically related, but NOT the same fact — do not
+  pair): a ground-truth fact says "No anemia reported," and is MISSING.
+  A generated fact says "Hemoglobin 14 g/dL." Hemoglobin is clinically
+  relevant to anemia, but stating a lab value is not the same assertion
+  as stating an absence finding — one could be true while the other is
+  separately documented or omitted, and a reader cannot verify "no
+  anemia" from a hemoglobin number alone. Do not create an entry pairing
+  them. "No anemia reported" being genuinely absent from the generated
+  note — with no separate absence statement anywhere — is not resolved
+  by a hemoglobin value existing elsewhere; it simply has no entry. The
+  same logic applies to any other pair that is merely evidentially or
+  diagnostically related rather than a restatement of the same
+  assertion (a symptom and the test that would investigate it, a
+  diagnosis and one lab value among several that could support it, and
+  so on).
 
 Each ground-truth fact appears in at most one section_placement_issues
 entry. A generated fact may appear in more than one entry if it
