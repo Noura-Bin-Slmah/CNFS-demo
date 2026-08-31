@@ -448,13 +448,18 @@ In both examples, leave every classification exactly as already decided
 UNSUPPORTED) — a section_placement_issues entry only adds an explanation,
 it never reclassifies anything.
 
-The default outcome for a MISSING fact is NO entry. Only report one when
-you can point to an actual generated fact that positively documents the
-same clinical content elsewhere. If step 1 and step 2 both find nothing,
-stop — do not force a pairing, do not guess, and do not create an entry
-just because the fact is missing. Most MISSING facts will end this
-process with no section_placement_issues entry at all, and that is the
-expected, correct result, not a gap to fill.
+Run steps 1 and 2 for every MISSING fact — do not skip the search or
+assume there is no match without actually checking both steps. A lab
+value, vital, or similar finding that is missing in one section while
+genuinely present in another is common, and step 1's canonical check
+alone should usually find it when it exists — searching thoroughly is as
+important as not fabricating a result.
+
+Whether a MISSING fact ends up with a section_placement_issues entry
+depends entirely on whether steps 1-2 turn up a genuine match — report
+one whenever you find one, and only skip it when you genuinely find
+nothing. Do not force a pairing, and do not guess, when nothing is
+there.
   Worked example (no genuine counterpart — correct outcome is no entry):
   a ground-truth fact says "No anemia noted," assigned to Objective, and
   is MISSING there. Its canonical section is also Objective (an absence

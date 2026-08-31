@@ -217,6 +217,12 @@ class ClinicalNoteEvaluator:
         gt_by_id: dict[str, ClinicalFact],
         gen_by_id: dict[str, ClinicalFact],
     ) -> tuple[list[FactMatch], list[ExtraGeneratedFact], list[ClinicalErrorEvent], list[SectionPlacementIssue]]:
+        # Two invariants below (MISSING must not carry a generated fact; a match must
+        # stay within one section) are things the LLM sometimes gets wrong even after a
+        # repair retry — rejecting outright risked exhausting retries and failing the
+        # whole request. Sanitizing in place (drop the bad reference, downgrade to
+        # MISSING) keeps the evaluation resilient; any generated fact this orphans is
+        # swept into extras below rather than silently vanishing from the coverage count.
         matches: list[FactMatch] = []
         used_generated_ids: set[str] = set()
         for raw_match in payload.get("fact_matches", []):
@@ -226,6 +232,22 @@ class ClinicalNoteEvaluator:
             generated_id = raw_match.get("generated_fact_id")
             gen_fact = gen_by_id.get(generated_id) if generated_id else None
             classification = MatchClassification(raw_match.get("classification", "MISSING"))
+
+            if classification == MatchClassification.MISSING and gen_fact is not None:
+                LOGGER.warning(
+                    "Dropping generated_fact_id %s attached to a MISSING match for %s.",
+                    gen_fact.id, gt_fact.id,
+                )
+                gen_fact = None
+            elif gen_fact is not None and gen_fact.section != gt_fact.section:
+                LOGGER.warning(
+                    "Match for %s (%s) named generated fact %s in a different section "
+                    "(%s) — discarding the cross-section match; %s is now MISSING.",
+                    gt_fact.id, gt_fact.section, gen_fact.id, gen_fact.section, gt_fact.id,
+                )
+                gen_fact = None
+                classification = MatchClassification.MISSING
+
             if classification != MatchClassification.MISSING and gen_fact is None:
                 raise ValueError(
                     f"fact_matches entry for {gt_fact.id} has classification {classification} "
@@ -261,11 +283,22 @@ class ClinicalNoteEvaluator:
         if missing_gt_ids:
             raise ValueError(f"match-and-classify output omitted ground-truth facts: {sorted(missing_gt_ids)}")
 
-        unaccounted_generated_ids = set(gen_by_id) - used_generated_ids
-        if unaccounted_generated_ids:
-            raise ValueError(
-                "match-and-classify output omitted generated facts: "
-                f"{sorted(unaccounted_generated_ids)}"
+        # Any generated fact orphaned by the sanitization above (or simply never
+        # mentioned by the LLM) is defensively treated as unsupported rather than
+        # raising — conservative (grants no undue credit) and keeps the request from
+        # failing over a coverage gap the LLM should have closed itself.
+        for generated_id in sorted(set(gen_by_id) - used_generated_ids):
+            gen_fact = gen_by_id[generated_id]
+            LOGGER.warning(
+                "Generated fact %s was left unaccounted for; defaulting it to unsupported.",
+                gen_fact.id,
+            )
+            extras.append(
+                ExtraGeneratedFact(
+                    generated_fact=gen_fact,
+                    classification=GeneratedFactClassification.UNSUPPORTED,
+                    reason="Automatically marked unsupported — the judge did not account for this fact.",
+                )
             )
 
         clinical_error_events = ClinicalNoteEvaluator._parse_clinical_error_events(

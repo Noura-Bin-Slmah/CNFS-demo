@@ -562,14 +562,95 @@ def test_section_placement_issue_reported_for_cross_section_match():
     assert issue.generated_fact.section == "Assessment"
 
 
-def test_match_and_classify_retries_when_generated_fact_is_omitted():
+def test_unaccounted_generated_fact_defaults_to_unsupported_without_retrying():
+    # An omitted unsupported_facts entry is sanitized in place (defaulted to
+    # unsupported) rather than forcing a retry — retrying on this specific gap
+    # was found to sometimes exhaust the retry budget and fail the whole
+    # request when the LLM repeats the same omission.
     client = FakeLLMClient(omit_extra_once=True)
     result = evaluator(client=client, config=MetricConfig(llm_retry_attempts=1)).evaluate(
         ground_truth_note="Nasal discharge.",
         generated_note="Nasal discharge. Patient reports cough.",
     )
 
-    assert client.match_calls == 2  # first match attempt was incomplete, retry succeeded
+    assert client.match_calls == 1  # no retry needed; the gap is defaulted instead
+    assert result.counts.unsupported == 1
+
+
+def test_missing_classification_with_generated_fact_id_is_sanitized():
+    # The LLM sometimes attaches a generated_fact_id to a MISSING match, which
+    # is invalid (MISSING means no matching generated fact exists). The
+    # evaluator drops the bad reference instead of trusting or rejecting it,
+    # and the orphaned generated fact is still accounted for as unsupported.
+    class MissingWithGeneratedIdLLMClient:
+        def generate_json(self, *, system_prompt, user_prompt, model, temperature):
+            kind = _call_kind(user_prompt)
+            if kind == "extract_gt":
+                return {"facts": [{"id": "gt_0001", "section": "Subjective", "concept": "foot pain", "evidence_text": "Foot pain."}]}
+            if kind == "extract_gen":
+                return {"facts": [{"id": "gen_0001", "section": "Subjective", "concept": "unrelated finding", "evidence_text": "Unrelated finding."}]}
+            return {
+                "fact_matches": [
+                    {
+                        "ground_truth_fact_id": "gt_0001",
+                        "generated_fact_id": "gen_0001",
+                        "classification": "MISSING",
+                        "reason": "No match found.",
+                    }
+                ],
+                "unsupported_facts": [],
+                "clinical_error_events": [],
+                "section_placement_issues": [],
+            }
+
+    result = evaluator(client=MissingWithGeneratedIdLLMClient()).evaluate(
+        ground_truth_note="Subjective: Foot pain.",
+        generated_note="Subjective: Unrelated finding.",
+    )
+
+    assert result.counts.missing == 1
+    match = result.fact_matches[0]
+    assert match.classification == "MISSING"
+    assert match.generated_fact is None
+    assert result.counts.unsupported == 1
+
+
+def test_cross_section_match_is_downgraded_to_missing():
+    # The LLM sometimes matches a ground-truth fact to a generated fact in a
+    # different section, violating same-section-only matching. The evaluator
+    # discards the cross-section match (downgrading to MISSING) instead of
+    # trusting a classification built on an invalid pairing.
+    class CrossSectionMatchLLMClient:
+        def generate_json(self, *, system_prompt, user_prompt, model, temperature):
+            kind = _call_kind(user_prompt)
+            if kind == "extract_gt":
+                return {"facts": [{"id": "gt_0001", "section": "Plan", "concept": "continue metformin", "evidence_text": "Continue metformin."}]}
+            if kind == "extract_gen":
+                return {"facts": [{"id": "gen_0001", "section": "Assessment", "concept": "continue metformin", "evidence_text": "Continue metformin."}]}
+            return {
+                "fact_matches": [
+                    {
+                        "ground_truth_fact_id": "gt_0001",
+                        "generated_fact_id": "gen_0001",
+                        "classification": "CORRECT",
+                        "reason": "Matches.",
+                    }
+                ],
+                "unsupported_facts": [],
+                "clinical_error_events": [],
+                "section_placement_issues": [],
+            }
+
+    result = evaluator(client=CrossSectionMatchLLMClient()).evaluate(
+        ground_truth_note="Plan: Continue metformin.",
+        generated_note="Assessment: Continue metformin.",
+    )
+
+    assert result.counts.missing == 1
+    assert result.counts.correct == 0
+    match = result.fact_matches[0]
+    assert match.classification == "MISSING"
+    assert match.generated_fact is None
     assert result.counts.unsupported == 1
 
 
