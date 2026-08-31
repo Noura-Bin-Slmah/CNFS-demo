@@ -447,16 +447,51 @@ In both examples, leave every classification exactly as already decided
 (MISSING stays MISSING, CORRECT stays CORRECT, UNSUPPORTED stays
 UNSUPPORTED) — a section_placement_issues entry only adds an explanation,
 it never reclassifies anything.
+
+The default outcome for a MISSING fact is NO entry. Only report one when
+you can point to an actual generated fact that positively documents the
+same clinical content elsewhere. If step 1 and step 2 both find nothing,
+stop — do not force a pairing, do not guess, and do not create an entry
+just because the fact is missing. Most MISSING facts will end this
+process with no section_placement_issues entry at all, and that is the
+expected, correct result, not a gap to fill.
+  Worked example (no genuine counterpart — correct outcome is no entry):
+  a ground-truth fact says "No anemia noted," assigned to Objective, and
+  is MISSING there. Its canonical section is also Objective (an absence
+  of an abnormal lab finding), so step 1 searches Objective and finds
+  nothing — the generated note never mentions anemia anywhere at all.
+  Step 2 scans every other section and also finds nothing. Do not create
+  a section_placement_issues entry for this fact under any circumstances
+  — not paired with an unrelated fact, not with a vague or partial
+  resemblance. This ground-truth fact is genuinely absent from the
+  generated note; the reconciliation report says nothing about it.
+
+Before writing any section_placement_issues entry, verify it passes all
+of the following — if any one fails, delete the entry instead of writing
+it:
+- The reason describes a positive match you actually found — it names
+  the specific generated content and where it is. A reason that itself
+  says "not documented," "not found," "no match," "is missing," or
+  anything else negating the pairing is proof the entry should not
+  exist; delete it instead of writing it that way.
+- generated_fact_id names the one generated fact that actually contains
+  the matching content — never a generated fact chosen because it was
+  merely available, in the right general area, or the closest thing you
+  could find. If you cannot name a specific generated fact whose content
+  genuinely documents this ground-truth fact, there is no entry to make.
+- The section your reason names as where the content was found is the
+  same section as the generated_fact_id you are reporting — never name
+  one section in the explanation and report a different fact's section
+  in the data.
 - Only pair a MISSING fact with a generated fact when they genuinely
   describe the same clinical content — do not create an entry for a
   coincidental topical resemblance (two different findings that just
   happen to concern the same condition).
-- A MISSING fact with no genuine counterpart found in either step simply
-  has no section_placement_issues entry — most MISSING facts will not.
-- Each ground-truth fact appears in at most one section_placement_issues
-  entry. A generated fact may appear in more than one entry if it
-  genuinely explains more than one ground-truth fact restated in
-  different sections.
+
+Each ground-truth fact appears in at most one section_placement_issues
+entry. A generated fact may appear in more than one entry if it
+genuinely explains more than one ground-truth fact restated in different
+sections.
 
 Coverage requirements:
 - Every ground-truth fact id from the list below must appear exactly once
@@ -498,7 +533,11 @@ output this checklist:
 7. Every section_placement_issues entry pairs a fact actually classified
    MISSING with a generated fact that genuinely describes the same
    clinical content, in a different section — whether or not that
-   generated fact is also matched elsewhere.
+   generated fact is also matched elsewhere. No entry's reason contains
+   words negating its own pairing ("not documented," "not found," "no
+   match," "is missing") — any entry that would need such wording is
+   deleted instead, not written. No MISSING fact was given an entry just
+   because it is missing; most have none.
 8. Qualifier loss (PARTIAL) is distinguished from wrong core content
    (INCORRECT) and from a reversed core assertion (CONTRADICTION).
 9. The same underlying clinical error was not reported as more than one
