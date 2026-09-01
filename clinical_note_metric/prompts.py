@@ -176,21 +176,56 @@ the complete, authoritative inventory of clinical facts in each note — do
 not add, remove, split, or merge facts, and do not introduce any fact that
 is not present in one of the two lists.
 
+Entity-anchored matching test — this is the one test for whether two facts
+are "the same clinical content," used everywhere below that phrase
+appears (primary matching in step 2, and the reconciliation pass): a
+candidate is a genuine match only if its evidence_text names or clearly
+refers to the same specific clinical entity as the other fact — the same
+lab/test name, the same medication, the same symptom, the same
+measurement, the same diagnosis. Topical proximity, being in a plausible
+section, or discussing a related body system is not enough on its own.
+  Worked example (fails the test — do not match): a ground-truth fact's
+  concept is "hemoglobin 14." A candidate generated fact's evidence_text
+  is "She checks her blood sugar and reports recent readings around 6.3."
+  This candidate never names hemoglobin at all — it is about blood
+  glucose, a different lab entity. It fails the test regardless of both
+  being lab-related and in the same section. Do not pair them; the
+  hemoglobin fact has no match here.
+  Worked example (fails the test — do not match): a ground-truth fact's
+  concept is "normal kidney function." A candidate generated fact's
+  evidence_text is "She denies hypoglycemic episodes." This candidate
+  never mentions kidney function — it is a different clinical topic
+  entirely. Do not pair them.
+  Worked example (passes the test — a genuine match): a ground-truth
+  fact's concept is "hemoglobin 14." A candidate generated fact's
+  evidence_text is "Hemoglobin is 14 g/dL." Both name the same specific
+  entity (hemoglobin) and the same value — genuinely the same content,
+  even though the wording differs. This is a match.
+If you cannot point to the specific shared entity a candidate names, it
+fails the test — the correct result is not pairing it, not picking the
+closest available content.
+
 Do the full clinical judging work in this single response:
 
 1. If a transcript is provided, use it only to decide whether extra
    generated facts are SUPPORTED_BUT_ABSENT_FROM_GT instead of UNSUPPORTED.
-2. Match each ground-truth fact to a generated fact semantically, by
-   clinical content, searching only among generated facts in the SAME
-   section as that ground-truth fact — both fact lists were already
-   assigned their section during extraction, and that assignment is
-   authoritative here; do not search other sections and do not reassign a
-   fact's section. If no generated fact in that same section documents
-   this ground-truth fact's content, it is MISSING for this section, even
-   if matching content happens to exist in a different section of the
-   generated note — that possibility is handled separately, in the
-   section-placement reconciliation step below, and never changes this
-   fact's classification.
+2. Match each ground-truth fact to a generated fact using the
+   entity-anchored matching test above, searching only among generated
+   facts in the SAME section as that ground-truth fact — both fact lists
+   were already assigned their section during extraction, and that
+   assignment is authoritative here; do not search other sections and do
+   not reassign a fact's section. Before setting a non-null
+   generated_fact_id, name the specific shared entity the candidate
+   evidence_text actually contains — if you cannot, it fails the test and
+   is not a match. If no generated fact in that same section passes the
+   test, the ground-truth fact is MISSING for this section, even if
+   matching content happens to exist in a different section of the
+   generated note (handled separately, in the section-placement
+   reconciliation step below) or if other, unrelated generated facts sit
+   in the same section. Never pair a fact with the nearest or only
+   available same-section content when nothing actually passes the test —
+   MISSING is the correct, expected result in that case, not a gap to
+   fill.
 3. Classify every ground-truth fact as CORRECT, PARTIAL, INCORRECT,
    CONTRADICTION, or MISSING.
 4. Classify every generated fact that is not matched to a ground-truth
@@ -418,8 +453,8 @@ nothing:
    decide the one canonical section for this fact's content type. Search
    only the generated facts already in that canonical section (including
    one already matched to a different ground-truth fact — do not skip a
-   generated fact just because it is spoken for elsewhere) for a semantic
-   match — the same clinical action or finding. If found, report a
+   generated fact just because it is spoken for elsewhere) for one that
+   passes the entity-anchored matching test above. If found, report a
    section_placement_issues entry and stop; do not also run step 2.
    Worked example: a ground-truth fact says "Labs show hemoglobin 14,"
    assigned to Subjective, and is MISSING there because the generated
@@ -432,8 +467,8 @@ nothing:
    generated note does document there.
 2. Fallback scan (only if step 1 found nothing): search every remaining
    generated fact in every other section — including ones already
-   matched elsewhere, not only ones classified UNSUPPORTED — for the
-   same semantic match.
+   matched elsewhere, not only ones classified UNSUPPORTED — for one
+   that passes the same test.
    Worked example: a ground-truth fact says "Continue metformin 500mg
    twice daily," assigned to Plan, and is MISSING there. A medication
    instruction's canonical section is also Plan, so step 1 searches Plan
@@ -488,25 +523,20 @@ it:
   same section as the generated_fact_id you are reporting — never name
   one section in the explanation and report a different fact's section
   in the data.
-- Only pair a MISSING fact with a generated fact when they genuinely
-  describe the same clinical content — do not create an entry for a
-  coincidental topical resemblance (two different findings that just
-  happen to concern the same condition).
-  Worked example (topically related, but NOT the same fact — do not
-  pair): a ground-truth fact says "No anemia reported," and is MISSING.
-  A generated fact says "Hemoglobin 14 g/dL." Hemoglobin is clinically
-  relevant to anemia, but stating a lab value is not the same assertion
-  as stating an absence finding — one could be true while the other is
-  separately documented or omitted, and a reader cannot verify "no
-  anemia" from a hemoglobin number alone. Do not create an entry pairing
-  them. "No anemia reported" being genuinely absent from the generated
-  note — with no separate absence statement anywhere — is not resolved
-  by a hemoglobin value existing elsewhere; it simply has no entry. The
-  same logic applies to any other pair that is merely evidentially or
-  diagnostically related rather than a restatement of the same
-  assertion (a symptom and the test that would investigate it, a
-  diagnosis and one lab value among several that could support it, and
-  so on).
+- Apply the entity-anchored matching test above here too: only pair a
+  MISSING fact with a generated fact that names the same specific
+  clinical entity, in either step 1 or step 2. Topical or diagnostic
+  relatedness is not enough.
+  Worked example (fails the test — do not pair): a ground-truth fact
+  says "No anemia reported," and is MISSING. A generated fact says
+  "Hemoglobin 14 g/dL." Hemoglobin is clinically relevant to anemia, but
+  the two facts name different entities — one is an absence finding
+  about anemia, the other is a lab value for hemoglobin — and a reader
+  cannot verify "no anemia" from a hemoglobin number alone. This fails
+  the test the same way it would anywhere else in this prompt. Do not
+  create an entry pairing them; "No anemia reported" being genuinely
+  absent from the generated note is not resolved by a hemoglobin value
+  existing elsewhere — it simply has no entry.
 
 Each ground-truth fact appears in at most one section_placement_issues
 entry. A generated fact may appear in more than one entry if it
@@ -543,6 +573,12 @@ output this checklist:
    MISSING. CORRECT, PARTIAL, INCORRECT, and CONTRADICTION all require an
    actual matched generated fact; there is no such thing as a CORRECT
    match against nothing.
+3b. Every non-null generated_fact_id in fact_matches passes the
+   entity-anchored matching test above — for each one, you can name the
+   specific shared entity its evidence_text has in common with the
+   ground-truth fact. Any match where you cannot name that shared entity
+   is not a real match; change it to MISSING (generated_fact_id null)
+   rather than leaving a forced pairing in place.
 4. No fact is CONTRADICTION and also CORRECT or PARTIAL for the same
    ground-truth fact.
 5. Equivalent paraphrases were not penalized as PARTIAL, INCORRECT, or
